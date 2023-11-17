@@ -94,6 +94,8 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
     -- Procedimiento para leer información de un aeropuerto
     FUNCTION leer_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN aeropuerto%ROWTYPE;
     
+    PROCEDURE leer_aeropuertos(p_aeropuertos OUT SYS_REFCURSOR);
+    
     -- Procedimiento para actualizar información de un aeropuerto
     PROCEDURE actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
@@ -127,6 +129,17 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         WHERE AEROPUERTO_ID = p_aeropuerto_id;
         RETURN v_info;
     END leer_aeropuerto;
+    
+    PROCEDURE leer_aeropuertos(
+        p_aeropuertos OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        OPEN p_aeropuertos FOR
+        SELECT * 
+        FROM aeropuerto;
+    END;
+    
     
     -- Implementación de procedimiento para actualizar un aeropuerto
     PROCEDURE actualizar_aeropuerto(
