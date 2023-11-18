@@ -1,9 +1,3 @@
-SELECT *
-FROM aeropuerto a
-INNER JOIN vuelo v
-ON a.aeropuerto_id = v.aeropuerto_llegada_id or a.aeropuerto_id = v.aeropuerto_salida_id
-WHERE a.aeropuerto_id = 2;
-
 CREATE OR REPLACE PACKAGE aeropuerto_utils AS
     TYPE aeropuerto_type IS RECORD
     (
@@ -16,7 +10,7 @@ CREATE OR REPLACE PACKAGE aeropuerto_utils AS
     PROCEDURE obtener_info(
         p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
         p_aeropuerto_info OUT aeropuerto%ROWTYPE,
-        p_vuelos_llegada OUT SYS_REFCURSOR
+        p_vuelos_llegada OUT SYS_REFCURSOR,
         p_vuelos_salida OUT SYS_REFCURSOR
     );
 END aeropuerto_utils;
@@ -25,7 +19,7 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_utils AS
     PROCEDURE obtener_info(
         p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
         p_aeropuerto_info OUT aeropuerto%ROWTYPE,
-        p_vuelos_llegada OUT SYS_REFCURSOR
+        p_vuelos_llegada OUT SYS_REFCURSOR,
         p_vuelos_salida OUT SYS_REFCURSOR
     ) IS
     BEGIN
