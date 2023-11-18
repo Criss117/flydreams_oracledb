@@ -77,6 +77,7 @@ END AVION_CRUD;
 
 ------------------------------------------------------------------------------------------------------
 --Paquete para operaciones CRUD en la tabla AEROPUERTO
+DROP SEQUENCE aeropuertos_seq;
 CREATE SEQUENCE aeropuertos_seq
     START WITH 7
     INCREMENT BY 1
@@ -118,6 +119,7 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     BEGIN
         INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
         VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
+        COMMIT;
     END crear_aeropuerto;
     
     -- Implementación de función para leer un aeropuerto
