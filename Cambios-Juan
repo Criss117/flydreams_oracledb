@@ -97,7 +97,7 @@ CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
 END VUELO_CRUD;
 
 --Cambios en el crud - aeropuerto Obtener toda la información de un aeropuerto según el id en un rowtype, además de los vuelos que llegan y salen de ese aeropuerto, usando sys_refcursor.
-create or replace NONEDITIONABLE PACKAGE aeropuerto_crud AS
+create or replace PACKAGE aeropuerto_crud AS
     -- Procedimiento para crear un nuevo aeropuerto
     PROCEDURE crear_aeropuerto(
         p_nombre IN VARCHAR2,
@@ -128,7 +128,7 @@ create or replace NONEDITIONABLE PACKAGE aeropuerto_crud AS
     );
 END aeropuerto_crud;
 
-create or replace NONEDITIONABLE PACKAGE BODY aeropuerto_crud AS
+create or replace PACKAGE BODY aeropuerto_crud AS
     -- Implementación de procedimiento para crear un aeropuerto
     PROCEDURE crear_aeropuerto(
         p_nombre IN VARCHAR2,
@@ -201,3 +201,123 @@ create or replace NONEDITIONABLE PACKAGE BODY aeropuerto_crud AS
         WHERE AEROPUERTO_SALIDA_ID = p_aeropuerto_id OR AEROPUERTO_LLEGADA_ID = p_aeropuerto_id;
     END obtener_info_aeropuerto_con_vuelos;
 END aeropuerto_crud;
+
+
+--Cambios en el CRUD - piloto -Asignar piloto a un avión, verificar que el piloto no esté asignado a un avión en el mismo intervalo de tiempo.
+CREATE OR REPLACE PACKAGE PILOTO_CRUD AS
+    PROCEDURE crear_piloto(
+        p_persona_id IN NUMBER,
+        p_licencia_id IN NUMBER,
+        p_vuelos IN NUMBER,
+        p_emision_licencia IN DATE,
+        p_vencimiento_licencia IN DATE
+    );
+    
+    PROCEDURE leer_piloto(
+        p_piloto_id IN NUMBER,
+        p_info OUT piloto%ROWTYPE
+    );
+
+    PROCEDURE actualizar_piloto(
+        p_piloto_id IN NUMBER,
+        p_vuelos IN NUMBER,
+        p_emision_licencia IN DATE
+    );
+
+    PROCEDURE eliminar_piloto(
+        p_piloto_id IN NUMBER
+    );
+    
+     -- Procedimiento para asignar un piloto a un avión y verificar disponibilidad
+    FUNCTION asignar_piloto(
+        p_piloto_id IN NUMBER,
+        p_avion_id IN NUMBER,
+        p_fecha_salida IN DATE,
+        p_fecha_llegada IN DATE
+    )
+    RETURN BOOLEAN;
+END PILOTO_CRUD;
+/
+CREATE OR REPLACE PACKAGE BODY PILOTO_CRUD AS
+    PROCEDURE crear_piloto(
+        p_persona_id IN NUMBER,
+        p_licencia_id IN NUMBER,
+        p_vuelos IN NUMBER,
+        p_emision_licencia IN DATE,
+        p_vencimiento_licencia IN DATE
+    ) IS
+    BEGIN
+        INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
+        VALUES (p_persona_id, piloto_seq.NEXTVAL, p_licencia_id, p_vuelos, p_emision_licencia, p_vencimiento_licencia);
+    END crear_piloto;
+
+    PROCEDURE leer_piloto(
+        p_piloto_id IN NUMBER,
+        p_info OUT piloto%ROWTYPE
+    ) IS
+    BEGIN
+        SELECT * 
+        INTO p_info
+        FROM PILOTO 
+        WHERE PILOTO_ID = p_piloto_id;
+    END leer_piloto;
+
+    PROCEDURE actualizar_piloto(
+        p_piloto_id IN NUMBER,
+        p_vuelos IN NUMBER,
+        p_emision_licencia IN DATE
+    ) IS
+    BEGIN
+        UPDATE PILOTO
+        SET VUELOS = p_vuelos,
+            EMISION_LICENCIA = p_emision_licencia
+        WHERE PILOTO_ID = p_piloto_id;
+    END actualizar_piloto;
+
+    PROCEDURE eliminar_piloto(p_piloto_id IN NUMBER) IS
+    BEGIN
+        DELETE FROM PILOTO WHERE PILOTO_ID = p_piloto_id;
+    END eliminar_piloto;
+    
+    -- Procedimiento para asignar un piloto a un avión y verificar disponibilidad
+    FUNCTION asignar_piloto(
+        p_piloto_id IN NUMBER,
+        p_avion_id IN NUMBER,
+        p_fecha_salida IN DATE,
+        p_fecha_llegada IN DATE
+    )
+    RETURN BOOLEAN
+    IS
+        v_piloto_disponible number;
+    BEGIN
+        -- Verificar si el piloto está disponible en el intervalo de tiempo
+        SELECT COUNT(*)
+        INTO v_piloto_disponible
+        FROM PILOTO p INNER JOIN PILOTA ON p.PILOTO_ID = PILOTA.PILOTO_ID
+            INNER JOIN AVION ON PILOTA.AVION_ID = AVION.AVION_ID
+            INNER JOIN VUELO v ON AVION.AVION_ID = v.AVION_ID
+        WHERE p.PILOTO_ID = p_piloto_id
+          AND (
+            (v.FECHA_SALIDA BETWEEN p_fecha_salida AND p_fecha_llegada)
+            OR (v.FECHA_LLEGADA BETWEEN p_fecha_salida AND p_fecha_llegada)
+            OR (p_fecha_salida BETWEEN v.FECHA_SALIDA AND v.FECHA_LLEGADA)
+            OR (p_fecha_llegada BETWEEN v.FECHA_SALIDA AND v.FECHA_LLEGADA)
+          );
+        
+        
+        -- Si el piloto está disponible, asignarlo al avión
+        IF v_piloto_disponible!=0 THEN
+            UPDATE PILOTA
+            SET PILOTO_ID = p_piloto_id
+            WHERE AVION_ID = p_avion_id;
+
+            -- Devolver TRUE para indicar éxito en la asignación
+            RETURN TRUE;
+        ELSE
+            -- Devolver FALSE si el piloto no está disponible en el intervalo de tiempo
+            RETURN FALSE;
+        END IF;
+    END asignar_piloto;
+END PILOTO_CRUD;
+
+
