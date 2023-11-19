@@ -1,0 +1,203 @@
+--Cambios en el crud - vuelo Obtener vuelos paginados ordenados por fechas, retornar sys_refcursor.
+CREATE OR REPLACE PACKAGE VUELO_CRUD AS
+    PROCEDURE crear_vuelo(
+        p_aeropuerto_salida_id IN NUMBER,
+        p_aeropuerto_llegada_id IN NUMBER,
+        p_avion_id IN NUMBER,
+        p_destino IN VARCHAR2,
+        p_fecha_salida IN DATE,
+        p_fecha_llegada IN DATE,
+        p_cantidad_pasajeros IN NUMBER
+    );
+    
+    PROCEDURE leer_vuelo(
+        p_vuelo_id IN NUMBER,
+        p_info OUT vuelo%ROWTYPE
+    );
+
+    PROCEDURE actualizar_vuelo(
+        p_vuelo_id IN NUMBER,
+        p_cantidad_pasajeros IN NUMBER,
+        p_destino IN VARCHAR2
+    );
+
+    PROCEDURE eliminar_vuelo(
+        p_vuelo_id IN NUMBER
+    );
+    
+    -- Procedimiento para obtener vuelos paginados ordenados por fechas
+    PROCEDURE obtener_vuelos_paginados(
+        p_pagina_actual IN NUMBER,
+        p_tamano_pagina IN NUMBER,
+        p_vuelos OUT SYS_REFCURSOR
+    );
+END VUELO_CRUD;
+CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
+    PROCEDURE crear_vuelo(
+        p_aeropuerto_salida_id IN NUMBER,
+        p_aeropuerto_llegada_id IN NUMBER,
+        p_avion_id IN NUMBER,
+        p_destino IN VARCHAR2,
+        p_fecha_salida IN DATE,
+        p_fecha_llegada IN DATE,
+        p_cantidad_pasajeros IN NUMBER
+    ) IS
+    BEGIN
+        INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
+        VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, p_cantidad_pasajeros);
+    END crear_vuelo;
+
+    PROCEDURE leer_vuelo(
+        p_vuelo_id IN NUMBER,
+        p_info OUT vuelo%ROWTYPE
+    ) IS
+    BEGIN
+        SELECT * 
+        INTO p_info
+        FROM VUELO 
+        WHERE VUELO_ID = p_vuelo_id;
+    END leer_vuelo;
+
+    PROCEDURE actualizar_vuelo(
+        p_vuelo_id IN NUMBER,
+        p_cantidad_pasajeros IN NUMBER,
+        p_destino IN VARCHAR2
+    ) IS
+    BEGIN
+        UPDATE VUELO
+        SET CANTIDAD_PASAJEROS = p_cantidad_pasajeros,
+            DESTINO = p_destino
+        WHERE VUELO_ID = p_vuelo_id;
+    END actualizar_vuelo;
+
+    PROCEDURE eliminar_vuelo(
+        p_vuelo_id IN NUMBER
+    ) IS
+    BEGIN
+        DELETE FROM VUELO WHERE VUELO_ID = p_vuelo_id;
+    END eliminar_vuelo;
+    
+    -- Procedimiento para obtener vuelos paginados ordenados por fechas
+    PROCEDURE obtener_vuelos_paginados(
+        p_pagina_actual IN NUMBER,
+        p_tamano_pagina IN NUMBER,
+        p_vuelos OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        -- Calcular el rango de filas para la paginación
+        OPEN p_vuelos FOR
+        SELECT *
+        FROM (
+            SELECT VUELO.*, ROW_NUMBER() OVER (ORDER BY FECHA_SALIDA) AS rn
+            FROM VUELO
+        )
+        WHERE rn BETWEEN (p_pagina_actual - 1) * p_tamano_pagina + 1 AND p_pagina_actual * p_tamano_pagina;
+    END obtener_vuelos_paginados;
+END VUELO_CRUD;
+
+--Cambios en el crud - aeropuerto Obtener toda la información de un aeropuerto según el id en un rowtype, además de los vuelos que llegan y salen de ese aeropuerto, usando sys_refcursor.
+create or replace NONEDITIONABLE PACKAGE aeropuerto_crud AS
+    -- Procedimiento para crear un nuevo aeropuerto
+    PROCEDURE crear_aeropuerto(
+        p_nombre IN VARCHAR2,
+        p_pais IN VARCHAR2,
+        p_ciudad IN VARCHAR2
+    );
+
+    -- Procedimiento para leer información de un aeropuerto
+    FUNCTION leer_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN aeropuerto%ROWTYPE;
+
+    PROCEDURE leer_aeropuertos(p_aeropuertos OUT SYS_REFCURSOR);
+
+    -- Procedimiento para actualizar información de un aeropuerto
+    PROCEDURE actualizar_aeropuerto(
+        p_aeropuerto_id IN NUMBER,
+        p_nombre IN VARCHAR2,
+        p_pais IN VARCHAR2,
+        p_ciudad IN VARCHAR2
+    );
+
+    -- Procedimiento para eliminar un aeropuerto
+    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER);
+    -- Procedimiento para obtener información de un aeropuerto y sus vuelos
+    PROCEDURE obtener_info_aeropuerto_con_vuelos(
+        p_aeropuerto_id IN NUMBER,
+        p_aeropuerto_info OUT aeropuerto%ROWTYPE,
+        p_vuelos OUT SYS_REFCURSOR
+    );
+END aeropuerto_crud;
+
+create or replace NONEDITIONABLE PACKAGE BODY aeropuerto_crud AS
+    -- Implementación de procedimiento para crear un aeropuerto
+    PROCEDURE crear_aeropuerto(
+        p_nombre IN VARCHAR2,
+        p_pais IN VARCHAR2,
+        p_ciudad IN VARCHAR2
+    ) IS
+    BEGIN
+        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
+        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
+        COMMIT;
+    END crear_aeropuerto;
+
+    -- Implementación de función para leer un aeropuerto
+    FUNCTION leer_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN aeropuerto%ROWTYPE IS
+        v_info aeropuerto%ROWTYPE;
+    BEGIN
+        SELECT * INTO v_info
+        FROM AEROPUERTO
+        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+        RETURN v_info;
+    END leer_aeropuerto;
+
+    PROCEDURE leer_aeropuertos(
+        p_aeropuertos OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        OPEN p_aeropuertos FOR
+        SELECT * 
+        FROM aeropuerto;
+    END;
+
+
+    -- Implementación de procedimiento para actualizar un aeropuerto
+    PROCEDURE actualizar_aeropuerto(
+        p_aeropuerto_id IN NUMBER,
+        p_nombre IN VARCHAR2,
+        p_pais IN VARCHAR2,
+        p_ciudad IN VARCHAR2
+    ) IS
+    BEGIN
+        UPDATE AEROPUERTO
+        SET NOMBRE = p_nombre, PAIS = p_pais, CIUDAD = p_ciudad
+        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+    END actualizar_aeropuerto;
+
+    -- Implementación de procedimiento para eliminar un aeropuerto
+    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) IS
+    BEGIN
+        DELETE FROM AEROPUERTO
+        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+    END eliminar_aeropuerto;
+    -- Procedimiento para obtener información de un aeropuerto y sus vuelos
+    PROCEDURE obtener_info_aeropuerto_con_vuelos(
+        p_aeropuerto_id IN NUMBER,
+        p_aeropuerto_info OUT aeropuerto%ROWTYPE,
+        p_vuelos OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        -- Obtener información del aeropuerto
+        SELECT * INTO p_aeropuerto_info
+        FROM AEROPUERTO
+        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+
+        -- Obtener vuelos que llegan y salen de ese aeropuerto
+        OPEN p_vuelos FOR
+        SELECT VUELO.*
+        FROM VUELO
+        WHERE AEROPUERTO_SALIDA_ID = p_aeropuerto_id OR AEROPUERTO_LLEGADA_ID = p_aeropuerto_id;
+    END obtener_info_aeropuerto_con_vuelos;
+END aeropuerto_crud;
