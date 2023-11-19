@@ -320,4 +320,106 @@ CREATE OR REPLACE PACKAGE BODY PILOTO_CRUD AS
     END asignar_piloto;
 END PILOTO_CRUD;
 
+--Cambios CRUD - Avion Obtener todos los aviones paginados, retornar un sys_refcursor.
+CREATE OR REPLACE PACKAGE AVION_CRUD AS
+    PROCEDURE crear_avion(
+        p_tipo_id IN NUMBER,
+        p_capacidad_pasajeros IN NUMBER,
+        p_distancia_maxima IN NUMBER,
+        p_capacidad_combustible IN NUMBER,
+        p_velocidad_crucero IN NUMBER,
+        p_capacidad_bodega IN NUMBER
+    );
+    
+    PROCEDURE leer_avion(
+        p_avion_id IN NUMBER,
+        p_info OUT avion%ROWTYPE
+    );
 
+    PROCEDURE actualizar_avion(
+        p_avion_id IN NUMBER,
+        p_capacidad_pasajeros IN NUMBER,
+        p_distancia_maxima IN NUMBER
+    );
+
+    PROCEDURE eliminar_avion(
+        p_avion_id IN NUMBER
+    );
+    
+    -- Procedimiento para obtener aviones paginados
+    PROCEDURE obtener_aviones_paginados(
+        p_pagina IN NUMBER,
+        p_tamano_pagina IN NUMBER,
+        p_aviones OUT SYS_REFCURSOR
+    );
+END AVION_CRUD;
+CREATE OR REPLACE PACKAGE BODY AVION_CRUD AS
+    PROCEDURE crear_avion(
+        p_tipo_id IN NUMBER,
+        p_capacidad_pasajeros IN NUMBER,
+        p_distancia_maxima IN NUMBER,
+        p_capacidad_combustible IN NUMBER,
+        p_velocidad_crucero IN NUMBER,
+        p_capacidad_bodega IN NUMBER
+    ) IS
+    BEGIN
+        INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA)
+        VALUES (avion_seq.NEXTVAL, p_tipo_id, p_capacidad_pasajeros, p_distancia_maxima, p_capacidad_combustible, p_velocidad_crucero, p_capacidad_bodega);
+    END crear_avion;
+    
+    PROCEDURE leer_avion(
+        p_avion_id IN NUMBER,
+        p_info OUT avion%ROWTYPE
+    ) IS
+    BEGIN
+        SELECT * 
+        INTO p_info 
+        FROM AVION 
+        WHERE AVION_ID = p_avion_id;
+    END leer_avion;
+
+    PROCEDURE actualizar_avion(
+        p_avion_id IN NUMBER,
+        p_capacidad_pasajeros IN NUMBER,
+        p_distancia_maxima IN NUMBER
+    ) IS
+    BEGIN
+        UPDATE AVION
+        SET CAPACIDAD_PASAJEROS = p_capacidad_pasajeros, DISTANCIA_MAXIMA = p_distancia_maxima
+        WHERE AVION_ID = p_avion_id;
+    END actualizar_avion;
+
+    PROCEDURE eliminar_avion(
+        p_avion_id IN NUMBER
+    ) IS
+    BEGIN
+        DELETE FROM AVION
+        WHERE AVION_ID = p_avion_id;
+    END eliminar_avion;
+    
+    -- Procedimiento para obtener aviones paginados
+    PROCEDURE obtener_aviones_paginados(
+        p_pagina IN NUMBER,
+        p_tamano_pagina IN NUMBER,
+        p_aviones OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        OPEN p_aviones FOR
+        SELECT *
+        FROM (
+            SELECT
+                AVION_ID,
+                TIPO_ID,
+                CAPACIDAD_PASAJEROS,
+                DISTANCIA_MAXIMA,
+                CAPACIDAD_COMBUSTIBLE,
+                VELOCIDAD_CRUCERO,
+                CAPACIDAD_BODEGA,
+                ROW_NUMBER() OVER (ORDER BY AVION_ID) AS rn
+            FROM AVION
+        )
+        WHERE rn >= (p_pagina - 1) * p_tamano_pagina + 1
+          AND rn <= p_pagina * p_tamano_pagina;
+    END obtener_aviones_paginados;
+END AVION_CRUD;
