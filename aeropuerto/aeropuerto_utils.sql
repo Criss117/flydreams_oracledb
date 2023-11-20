@@ -29,19 +29,31 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_utils AS
         WHERE a.aeropuerto_id = p_aeropuerto_id;
         
         OPEN p_vuelos_llegada FOR
-        SELECT * 
+        SELECT 
+            v.vuelo_id, 
+            v.destino, 
+            v.fecha_llegada, 
+            v.fecha_salida, 
+            v.cantidad_pasajeros,
+            a.nombre aeropuerto_salida
         FROM vuelo v
+        INNER JOIN aeropuerto a
+        ON v.aeropuerto_salida_id = a.aeropuerto_id
         WHERE v.aeropuerto_llegada_id = p_aeropuerto_id;
         
         OPEN p_vuelos_salida FOR
-        SELECT * 
+        SELECT 
+            v.vuelo_id, 
+            v.destino, 
+            v.fecha_llegada, 
+            v.fecha_salida, 
+            v.cantidad_pasajeros,
+            a.nombre aeropuerto_llegada
         FROM vuelo v
+        INNER JOIN aeropuerto a
+        ON v.aeropuerto_llegada_id = a.aeropuerto_id
         WHERE v.aeropuerto_salida_id = p_aeropuerto_id;
     END obtener_info;
 END aeropuerto_utils;
 
-DECLARE
-    aeropuerto_info aeropuerto%ROWTYPE;
-BEGIN
-    aeropuerto_utils.obtener_info(1, aeropuerto_info);
-END;
+

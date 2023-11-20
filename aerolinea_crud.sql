@@ -394,25 +394,30 @@ END PILOTO_CRUD;
 /
 ---------------------------------------------------------------------------------------
 --PARA VUELO
+DROP SEQUENCE vuelo_seq;
 CREATE SEQUENCE vuelo_seq
     START WITH 4
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
+    
 CREATE OR REPLACE PACKAGE VUELO_CRUD AS
     PROCEDURE crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
-        p_fecha_salida IN DATE,
-        p_fecha_llegada IN DATE,
-        p_cantidad_pasajeros IN NUMBER
+        p_fecha_salida IN DATE, 
+        p_fecha_llegada IN DATE
     );
     
     PROCEDURE leer_vuelo(
         p_vuelo_id IN NUMBER,
         p_info OUT vuelo%ROWTYPE
+    );
+    
+    PROCEDURE leer_vuelos(
+        p_vuelos OUT SYS_REFCURSOR
     );
 
     PROCEDURE actualizar_vuelo(
@@ -432,12 +437,12 @@ CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE,
-        p_fecha_llegada IN DATE,
-        p_cantidad_pasajeros IN NUMBER
+        p_fecha_llegada IN DATE
     ) IS
     BEGIN
         INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-        VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, p_cantidad_pasajeros);
+        VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0);
+        COMMIT;
     END crear_vuelo;
 
     PROCEDURE leer_vuelo(
@@ -450,6 +455,28 @@ CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
         FROM VUELO 
         WHERE VUELO_ID = p_vuelo_id;
     END leer_vuelo;
+
+    PROCEDURE leer_vuelos(
+        p_vuelos OUT SYS_REFCURSOR
+    ) IS
+    BEGIN
+        OPEN p_vuelos FOR
+        SELECT 
+            v.vuelo_id,
+            v.aeropuerto_salida_id,
+            v.aeropuerto_llegada_id,
+            a.nombre aeropuerto_llegada,
+            b.nombre aeropuerto_salida,
+            v.destino,
+            v.fecha_llegada,
+            v.fecha_salida,
+            v.cantidad_pasajeros
+        FROM vuelo v
+        INNER JOIN aeropuerto a
+        ON v.aeropuerto_salida_id = a.aeropuerto_id
+        INNER JOIN aeropuerto b
+        ON v.aeropuerto_llegada_id = b.aeropuerto_id;
+    END;
 
     PROCEDURE actualizar_vuelo(
         p_vuelo_id IN NUMBER,
@@ -545,3 +572,5 @@ CREATE OR REPLACE PACKAGE BODY PASAJERO_CRUD AS
     END eliminar_pasajero;
 END PASAJERO_CRUD;
 /
+
+
