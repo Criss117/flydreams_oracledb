@@ -154,6 +154,7 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         UPDATE AEROPUERTO
         SET NOMBRE = p_nombre, PAIS = p_pais, CIUDAD = p_ciudad
         WHERE AEROPUERTO_ID = p_aeropuerto_id;
+        COMMIT;
     END actualizar_aeropuerto;
     
     -- Implementación de procedimiento para eliminar un aeropuerto
