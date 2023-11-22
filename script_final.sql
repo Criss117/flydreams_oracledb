@@ -293,42 +293,42 @@ VALUES (2, 'Femenino');
 
 --persona
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (1, 1, 123456789, 'Juan', 'Pï¿½rez', TO_DATE('2000-01-15', 'YYYY-MM-DD'), 'Paï¿½s', 'Ciudad');
+VALUES (1, 1, 123456789, 'Juan', 'Perez',TO_DATE('2000-01-15', 'YYYY-MM-DD'), 'Pais', 'Ciudad');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (2, 2, 987654321, 'Marï¿½a', 'Lï¿½pez', TO_DATE('1998-05-20', 'YYYY-MM-DD'), 'OtroPaï¿½s', 'OtraCiudad');
+VALUES (2, 2, 987654321, 'Maria', 'Lopez', TO_DATE('1998-05-20', 'YYYY-MM-DD'), 'OtroPais', 'OtraCiudad');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (3, 1, 555555555, 'Pedro', 'Gonzï¿½lez', TO_DATE('1995-09-10', 'YYYY-MM-DD'), 'DistintoPaï¿½s', 'DistintaCiudad');
+VALUES (3, 1, 555555555, 'Pedro', 'Gonzalez', TO_DATE('1995-09-10', 'YYYY-MM-DD'), 'DistintoPais', 'DistintaCiudad');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
 VALUES (4, 2, 111111111, 'Luisa', 'Martï¿½nez', TO_DATE('1990-03-25', 'YYYY-MM-DD'), 'OtroPais2', 'OtraCiudad2');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (5, 1, 999999999, 'Carlos', 'Ramï¿½rez', TO_DATE('1987-11-30', 'YYYY-MM-DD'), 'OtroPais3', 'OtraCiudad3');
+VALUES (5, 1, 999999999, 'Carlos', 'Ramirez', TO_DATE('1987-11-30', 'YYYY-MM-DD'), 'OtroPais3', 'OtraCiudad3');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (6, 2, 888888888, 'Marï¿½a', 'Lï¿½pez', TO_DATE('1992-05-14', 'YYYY-MM-DD'), 'Paï¿½sX', 'CiudadX');
+VALUES (6, 2, 888888888, 'Maria', 'Lopez', TO_DATE('1992-05-14', 'YYYY-MM-DD'), 'PaisX', 'CiudadX');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (7, 1, 777777777, 'Pedro', 'Gonzï¿½lez', TO_DATE('1990-09-20', 'YYYY-MM-DD'), 'Paï¿½sY', 'CiudadY');
+VALUES (7, 1, 777777777, 'Pedro', 'Gonzalez', TO_DATE('1990-09-20', 'YYYY-MM-DD'), 'PaisY', 'CiudadY');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (8, 2, 666666666, 'Luisa', 'Martï¿½nez', TO_DATE('1988-04-25', 'YYYY-MM-DD'), 'Paï¿½sZ', 'CiudadZ');
+VALUES (8, 2, 666666666, 'Luisa', 'Martinez', TO_DATE('1988-04-25', 'YYYY-MM-DD'), 'PaisZ', 'CiudadZ');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (9, 1, 555555555, 'Miguel', 'Hernï¿½ndez', TO_DATE('1985-12-30', 'YYYY-MM-DD'), 'Paï¿½sA', 'CiudadA');
+VALUES (9, 1, 555555555, 'Miguel', 'Hernandez', TO_DATE('1985-12-30', 'YYYY-MM-DD'), 'PaisA', 'CiudadA');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (10, 2, 444444444, 'Ana', 'Sï¿½nchez', TO_DATE('1983-06-10', 'YYYY-MM-DD'), 'Paï¿½sB', 'CiudadB');
+VALUES (10, 2, 444444444, 'Ana', 'Sanchez', TO_DATE('1983-06-10', 'YYYY-MM-DD'), 'PaisB', 'CiudadB');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (11, 1, 333333333, 'Santiago', 'Pï¿½rez', TO_DATE('1980-02-18', 'YYYY-MM-DD'), 'Paï¿½sC', 'CiudadC');
+VALUES (11, 1, 333333333, 'Santiago', 'Perez', TO_DATE('1980-02-18', 'YYYY-MM-DD'), 'PaisC', 'CiudadC');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (12, 2, 222222222, 'Carmen', 'Gï¿½mez', TO_DATE('1978-08-05', 'YYYY-MM-DD'), 'Paï¿½sD', 'CiudadD');
+VALUES (12, 2, 222222222, 'Carmen', 'Gomez', TO_DATE('1978-08-05', 'YYYY-MM-DD'), 'PaisD', 'CiudadD');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (13, 1, 111111111, 'Javier', 'Fernï¿½ndez', TO_DATE('1975-04-15', 'YYYY-MM-DD'), 'Paï¿½sE', 'CiudadE');
+VALUES (13, 1, 111111111, 'Javier', 'Fernï¿½ndez', TO_DATE('1975-04-15', 'YYYY-MM-DD'), 'PaisE', 'CiudadE');
 INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (14, 2, 99999999, 'Isabel', 'Ortega', TO_DATE('1973-10-25', 'YYYY-MM-DD'), 'Paï¿½sF', 'CiudadF');
+VALUES (14, 2, 99999999, 'Isabel', 'Ortega', TO_DATE('1973-10-25', 'YYYY-MM-DD'), 'PaisF', 'CiudadF');
 
 
 --azafata
 INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (1, 1, 100, 'Espaï¿½ol', 'Inglï¿½s');
+VALUES (1, 1, 100, 'Espanol', 'Ingles');
 INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (2, 2, 75, 'Francï¿½s', 'Alemï¿½n');
+VALUES (2, 2, 75, 'Frances', 'Aleman');
 INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (3, 3, 120, 'Inglï¿½s', 'Espaï¿½ol');
+VALUES (3, 3, 120, 'Ingles', 'Espanol');
 
 --tipo licencia
 INSERT INTO TIPO_LICENCIA (LICENCIA_ID, LICENCIA)
@@ -366,11 +366,11 @@ VALUES (6, 3, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-M
 
 --vuelo
 INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(1, 1, 2, 1, 'Destino1', TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-01-05', 'YYYY-MM-DD'), 100);
+VALUES(1, 1, 2, 1, 'Destino1', TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'), 100);
 INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(2, 3, 4, 2, 'Destino2', TO_DATE('2023-02-01', 'YYYY-MM-DD'), TO_DATE('2023-02-05', 'YYYY-MM-DD'), 120);
+VALUES(2, 3, 4, 2, 'Destino2', TO_DATE('2023-02-01 10:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 18:45:00', 'YYYY-MM-DD HH24:MI:SS'), 120);
 INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(3, 5, 6, 3, 'Destino3', TO_DATE('2023-03-01', 'YYYY-MM-DD'), TO_DATE('2023-03-05', 'YYYY-MM-DD'), 80);
+VALUES(3, 5, 6, 3, 'Destino3', TO_DATE('2023-03-01 12:30:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-03-05 20:15:00', 'YYYY-MM-DD HH24:MI:SS'), 80);
 
 --se asigna
 INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID)
@@ -416,7 +416,7 @@ VALUES (4, 4, 22);
 INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
 VALUES (5, 5, 30);
 
---CRUDS
+--Paquete para operaciones CRUD en la tabla AEROPUERTO
 DROP SEQUENCE aeropuertos_seq;
 CREATE SEQUENCE aeropuertos_seq
     START WITH 7
@@ -432,39 +432,81 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
         pais aeropuerto.pais%TYPE,
         ciudad aeropuerto.ciudad%TYPE
     );
-    
-    PROCEDURE obtener_info(
-        p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
-        p_aeropuerto_info OUT aeropuerto%ROWTYPE,
-        p_vuelos_llegada OUT SYS_REFCURSOR,
-        p_vuelos_salida OUT SYS_REFCURSOR
-    );
-
     -- Procedimiento para crear un nuevo aeropuerto
-    PROCEDURE crear_aeropuerto(
+    FUNCTION crear_aeropuerto(
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
+    ) RETURN BOOLEAN;
+    
+    -- Procedimiento para leer información de un aeropuerto
+    PROCEDURE leer_aeropuerto(
+        p_aeropuerto_id IN NUMBER,
+        p_aeropuerto_info OUT aeropuerto_type
     );
-        
+    
+    PROCEDURE obtener_info(
+        p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
+        p_aeropuerto_info OUT aeropuerto_type,
+        p_vuelos_llegada OUT SYS_REFCURSOR,
+        p_vuelos_salida OUT SYS_REFCURSOR
+    );
+    
     PROCEDURE leer_aeropuertos(p_aeropuertos OUT SYS_REFCURSOR);
     
-    -- Procedimiento para actualizar informaciï¿½n de un aeropuerto
-    PROCEDURE actualizar_aeropuerto(
+    -- Procedimiento para actualizar información de un aeropuerto
+    FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    );
+    )RETURN BOOLEAN;
     
     -- Procedimiento para eliminar un aeropuerto
     PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER);
 END aeropuerto_crud;
 /
 CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
+    -- Implementación de procedimiento para crear un aeropuerto
+    FUNCTION crear_aeropuerto(
+        p_nombre IN VARCHAR2,
+        p_pais IN VARCHAR2,
+        p_ciudad IN VARCHAR2
+    ) 
+    RETURN BOOLEAN
+    IS
+    BEGIN
+        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
+        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
+        COMMIT;
+        RETURN true;
+    END crear_aeropuerto;
+    
+    -- Implementación de función para leer un aeropuerto
+    PROCEDURE leer_aeropuerto(
+        p_aeropuerto_id IN NUMBER, 
+        p_aeropuerto_info OUT aeropuerto_type) 
+    IS
+    BEGIN
+        SELECT * 
+        INTO p_aeropuerto_info
+        FROM aeropuerto a
+        WHERE a.aeropuerto_id = p_aeropuerto_id;
+    END leer_aeropuerto;
+    
+    PROCEDURE leer_aeropuertos(
+        p_aeropuertos OUT SYS_REFCURSOR
+    )
+    IS
+    BEGIN
+        OPEN p_aeropuertos FOR
+        SELECT * 
+        FROM aeropuerto;
+    END;
+    
     PROCEDURE obtener_info(
         p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
-        p_aeropuerto_info OUT aeropuerto%ROWTYPE,
+        p_aeropuerto_info OUT aeropuerto_type,
         p_vuelos_llegada OUT SYS_REFCURSOR,
         p_vuelos_salida OUT SYS_REFCURSOR
     ) IS
@@ -500,45 +542,25 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         ON v.aeropuerto_llegada_id = a.aeropuerto_id
         WHERE v.aeropuerto_salida_id = p_aeropuerto_id;
     END obtener_info;
-
-    -- Implementaciï¿½n de procedimiento para crear un aeropuerto
-    PROCEDURE crear_aeropuerto(
-        p_nombre IN VARCHAR2,
-        p_pais IN VARCHAR2,
-        p_ciudad IN VARCHAR2
-    ) IS
-    BEGIN
-        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
-        COMMIT;
-    END crear_aeropuerto;
     
-    PROCEDURE leer_aeropuertos(
-        p_aeropuertos OUT SYS_REFCURSOR
-    )
-    IS
-    BEGIN
-        OPEN p_aeropuertos FOR
-        SELECT * 
-        FROM aeropuerto;
-    END;
-    
-    
-    -- Implementaciï¿½n de procedimiento para actualizar un aeropuerto
-    PROCEDURE actualizar_aeropuerto(
+    -- Implementación de procedimiento para actualizar un aeropuerto
+    FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    ) IS
+    )
+    RETURN BOOLEAN
+    IS
     BEGIN
         UPDATE AEROPUERTO
         SET NOMBRE = p_nombre, PAIS = p_pais, CIUDAD = p_ciudad
         WHERE AEROPUERTO_ID = p_aeropuerto_id;
         COMMIT;
+        RETURN TRUE;
     END actualizar_aeropuerto;
     
-    -- Implementaciï¿½n de procedimiento para eliminar un aeropuerto
+    -- Implementación de procedimiento para eliminar un aeropuerto
     PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) IS
     BEGIN
         DELETE FROM AEROPUERTO
@@ -557,14 +579,14 @@ CREATE SEQUENCE vuelo_seq
     NOCYCLE;
 / 
 CREATE OR REPLACE PACKAGE vuelo_crud AS
-    PROCEDURE crear_vuelo(
+    FUNCTION crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE, 
         p_fecha_llegada IN DATE
-    );
+    ) RETURN BOOLEAN;
     
     PROCEDURE obtener_info_para_crear(
         p_aeropuertos OUT SYS_REFCURSOR,
@@ -592,18 +614,21 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
 END vuelo_crud;
 /
 CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
-    PROCEDURE crear_vuelo(
+     FUNCTION crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE,
         p_fecha_llegada IN DATE
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
         INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
         VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0);
         COMMIT;
+        RETURN TRUE;
     END crear_vuelo;
 
     PROCEDURE obtener_info_para_crear(
@@ -675,3 +700,42 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
     END eliminar_vuelo;
 END vuelo_crud;
 /
+
+-----------------------------------------------------------------------------------
+--TRIGGERS
+DROP TRIGGER verificar_avion_vuelo;
+--verifica que el avión asignado no esté asignado a otro vuelo en el mismo intervalo de tiempo
+CREATE OR REPLACE TRIGGER verificar_avion_vuelo
+    BEFORE INSERT OR UPDATE OF avion_id ON vuelo
+FOR EACH ROW
+DECLARE
+    CURSOR aviones IS
+        SELECT v.fecha_salida, v.fecha_llegada
+        FROM vuelo v
+        WHERE v.avion_id = :NEW.avion_id;
+BEGIN
+
+    FOR avionInfo IN aviones LOOP
+        IF :NEW.fecha_salida 
+        BETWEEN avionInfo.fecha_salida 
+        AND avionInfo.fecha_llegada 
+        OR
+        :NEW.fecha_llegada 
+        BETWEEN avionInfo.fecha_salida 
+        AND avionInfo.fecha_llegada 
+        THEN
+            RAISE_APPLICATION_ERROR(
+                -20202, 
+                'El avion ya tiene asignado un vuelo en el rango de fechas'
+            );
+        END IF;
+    END LOOP;
+END;
+/
+
+
+
+
+
+
+

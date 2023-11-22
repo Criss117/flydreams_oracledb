@@ -3,7 +3,7 @@ CREATE SEQUENCE avion_seq
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
-
+/
 CREATE OR REPLACE PACKAGE AVION_CRUD AS
     PROCEDURE crear_avion(
         p_tipo_id IN NUMBER,
@@ -29,6 +29,7 @@ CREATE OR REPLACE PACKAGE AVION_CRUD AS
         p_avion_id IN NUMBER
     );
 END AVION_CRUD;
+/
 CREATE OR REPLACE PACKAGE BODY AVION_CRUD AS
     PROCEDURE crear_avion(
         p_tipo_id IN NUMBER,
@@ -85,25 +86,42 @@ CREATE SEQUENCE aeropuertos_seq
     NOCYCLE;
 /
 CREATE OR REPLACE PACKAGE aeropuerto_crud AS
+    TYPE aeropuerto_type IS RECORD
+    (
+        aeropuerto_id aeropuerto.aeropuerto_id%TYPE,
+        nombre aeropuerto.nombre%TYPE,
+        pais aeropuerto.pais%TYPE,
+        ciudad aeropuerto.ciudad%TYPE
+    );
     -- Procedimiento para crear un nuevo aeropuerto
-    PROCEDURE crear_aeropuerto(
+    FUNCTION crear_aeropuerto(
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    );
+    ) RETURN BOOLEAN;
     
     -- Procedimiento para leer información de un aeropuerto
-    FUNCTION leer_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN aeropuerto%ROWTYPE;
+    PROCEDURE leer_aeropuerto(
+        p_aeropuerto_id IN NUMBER,
+        p_aeropuerto_info OUT aeropuerto_type
+    );
+    
+    PROCEDURE obtener_info(
+        p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
+        p_aeropuerto_info OUT aeropuerto_type,
+        p_vuelos_llegada OUT SYS_REFCURSOR,
+        p_vuelos_salida OUT SYS_REFCURSOR
+    );
     
     PROCEDURE leer_aeropuertos(p_aeropuertos OUT SYS_REFCURSOR);
     
     -- Procedimiento para actualizar información de un aeropuerto
-    PROCEDURE actualizar_aeropuerto(
+    FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    );
+    )RETURN BOOLEAN;
     
     -- Procedimiento para eliminar un aeropuerto
     PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER);
@@ -111,25 +129,30 @@ END aeropuerto_crud;
 /
 CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     -- Implementación de procedimiento para crear un aeropuerto
-    PROCEDURE crear_aeropuerto(
+    FUNCTION crear_aeropuerto(
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
         INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
         VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
         COMMIT;
+        RETURN true;
     END crear_aeropuerto;
     
     -- Implementación de función para leer un aeropuerto
-    FUNCTION leer_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN aeropuerto%ROWTYPE IS
-        v_info aeropuerto%ROWTYPE;
+    PROCEDURE leer_aeropuerto(
+        p_aeropuerto_id IN NUMBER, 
+        p_aeropuerto_info OUT aeropuerto_type) 
+    IS
     BEGIN
-        SELECT * INTO v_info
-        FROM AEROPUERTO
-        WHERE AEROPUERTO_ID = p_aeropuerto_id;
-        RETURN v_info;
+        SELECT * 
+        INTO p_aeropuerto_info
+        FROM aeropuerto a
+        WHERE a.aeropuerto_id = p_aeropuerto_id;
     END leer_aeropuerto;
     
     PROCEDURE leer_aeropuertos(
@@ -142,19 +165,60 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         FROM aeropuerto;
     END;
     
+    PROCEDURE obtener_info(
+        p_aeropuerto_id IN aeropuerto.aeropuerto_id%TYPE,
+        p_aeropuerto_info OUT aeropuerto_type,
+        p_vuelos_llegada OUT SYS_REFCURSOR,
+        p_vuelos_salida OUT SYS_REFCURSOR
+    ) IS
+    BEGIN
+        SELECT * 
+        INTO p_aeropuerto_info 
+        FROM aeropuerto a
+        WHERE a.aeropuerto_id = p_aeropuerto_id;
+        
+        OPEN p_vuelos_llegada FOR
+        SELECT 
+            v.vuelo_id, 
+            v.destino, 
+            v.fecha_llegada, 
+            v.fecha_salida, 
+            v.cantidad_pasajeros,
+            a.nombre aeropuerto_salida
+        FROM vuelo v
+        INNER JOIN aeropuerto a
+        ON v.aeropuerto_salida_id = a.aeropuerto_id
+        WHERE v.aeropuerto_llegada_id = p_aeropuerto_id;
+        
+        OPEN p_vuelos_salida FOR
+        SELECT 
+            v.vuelo_id, 
+            v.destino, 
+            v.fecha_llegada, 
+            v.fecha_salida, 
+            v.cantidad_pasajeros,
+            a.nombre aeropuerto_llegada
+        FROM vuelo v
+        INNER JOIN aeropuerto a
+        ON v.aeropuerto_llegada_id = a.aeropuerto_id
+        WHERE v.aeropuerto_salida_id = p_aeropuerto_id;
+    END obtener_info;
     
     -- Implementación de procedimiento para actualizar un aeropuerto
-    PROCEDURE actualizar_aeropuerto(
+    FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
         p_ciudad IN VARCHAR2
-    ) IS
+    )
+    RETURN BOOLEAN
+    IS
     BEGIN
         UPDATE AEROPUERTO
         SET NOMBRE = p_nombre, PAIS = p_pais, CIUDAD = p_ciudad
         WHERE AEROPUERTO_ID = p_aeropuerto_id;
         COMMIT;
+        RETURN TRUE;
     END actualizar_aeropuerto;
     
     -- Implementación de procedimiento para eliminar un aeropuerto
@@ -173,7 +237,7 @@ CREATE SEQUENCE persona_seq
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
-    
+/
 CREATE OR REPLACE PACKAGE PERSONA_CRUD AS
     PROCEDURE crear_persona(
         p_genero_id IN NUMBER,
@@ -401,17 +465,22 @@ CREATE SEQUENCE vuelo_seq
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
-    
-CREATE OR REPLACE PACKAGE VUELO_CRUD AS
-    PROCEDURE crear_vuelo(
+/ 
+CREATE OR REPLACE PACKAGE vuelo_crud AS
+    FUNCTION crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE, 
         p_fecha_llegada IN DATE
-    );
+    ) RETURN BOOLEAN;
     
+    PROCEDURE obtener_info_para_crear(
+        p_aeropuertos OUT SYS_REFCURSOR,
+        p_aviones OUT SYS_REFCURSOR
+    );
+
     PROCEDURE leer_vuelo(
         p_vuelo_id IN NUMBER,
         p_info OUT vuelo%ROWTYPE
@@ -430,21 +499,41 @@ CREATE OR REPLACE PACKAGE VUELO_CRUD AS
     PROCEDURE eliminar_vuelo(
         p_vuelo_id IN NUMBER
     );
-END VUELO_CRUD;
-CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
-    PROCEDURE crear_vuelo(
+END vuelo_crud;
+/
+CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
+     FUNCTION crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
         p_avion_id IN NUMBER,
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE,
         p_fecha_llegada IN DATE
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
         INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
         VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0);
         COMMIT;
+        RETURN TRUE;
     END crear_vuelo;
+
+    PROCEDURE obtener_info_para_crear(
+        p_aeropuertos OUT SYS_REFCURSOR,
+        p_aviones OUT SYS_REFCURSOR
+    ) IS
+    BEGIN
+        OPEN p_aviones FOR
+        SELECT a.avion_id, ta.tipo_avion
+        FROM avion a
+        INNER JOIN tipo_avion ta
+        ON a.tipo_id = ta.tipo_id;
+        
+        OPEN p_aeropuertos FOR
+        SELECT a.aeropuerto_id, a.nombre
+        FROM aeropuerto a;
+    END obtener_info_para_crear;
 
     PROCEDURE leer_vuelo(
         p_vuelo_id IN NUMBER,
@@ -497,8 +586,7 @@ CREATE OR REPLACE PACKAGE BODY VUELO_CRUD AS
     BEGIN
         DELETE FROM VUELO WHERE VUELO_ID = p_vuelo_id;
     END eliminar_vuelo;
-END VUELO_CRUD;
-/
+END vuelo_crud;
 -----------------------------------------------------------------------------------
 --PARA PASAJERO:
 CREATE SEQUENCE pasajero_seq
