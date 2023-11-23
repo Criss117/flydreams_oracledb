@@ -91,7 +91,8 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
         aeropuerto_id aeropuerto.aeropuerto_id%TYPE,
         nombre aeropuerto.nombre%TYPE,
         pais aeropuerto.pais%TYPE,
-        ciudad aeropuerto.ciudad%TYPE
+        ciudad aeropuerto.ciudad%TYPE,
+        mostrar aeropuerto.mostrar%TYPE
     );
     -- Procedimiento para crear un nuevo aeropuerto
     FUNCTION crear_aeropuerto(
@@ -124,7 +125,7 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
     )RETURN BOOLEAN;
     
     -- Procedimiento para eliminar un aeropuerto
-    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER);
+    FUNCTION eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN BOOLEAN;
 END aeropuerto_crud;
 /
 CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
@@ -137,8 +138,8 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     RETURN BOOLEAN
     IS
     BEGIN
-        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
+        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad, 1);
         COMMIT;
         RETURN true;
     END crear_aeropuerto;
@@ -222,10 +223,14 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     END actualizar_aeropuerto;
     
     -- Implementación de procedimiento para eliminar un aeropuerto
-    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) IS
+    FUNCTION eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) 
+    RETURN BOOLEAN
+    IS
     BEGIN
-        DELETE FROM AEROPUERTO
-        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+        UPDATE AEROPUERTO 
+        SET MOSTRAR = 0;
+        COMMIT;
+        RETURN TRUE;
     END eliminar_aeropuerto;
     
 END aeropuerto_crud;
@@ -474,7 +479,7 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE, 
         p_fecha_llegada IN DATE
-    ) RETURN BOOLEAN;
+    ) RETURN vuelo.vuelo_id%TYPE;
     
     PROCEDURE obtener_info_para_crear(
         p_aeropuertos OUT SYS_REFCURSOR,
@@ -490,15 +495,15 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
         p_vuelos OUT SYS_REFCURSOR
     );
 
-    PROCEDURE actualizar_vuelo(
+    FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
         p_cantidad_pasajeros IN NUMBER,
         p_destino IN VARCHAR2
-    );
+    ) RETURN BOOLEAN;
 
-    PROCEDURE eliminar_vuelo(
+    FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
-    );
+    ) RETURN BOOLEAN;
 END vuelo_crud;
 /
 CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
@@ -510,13 +515,14 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         p_fecha_salida IN DATE,
         p_fecha_llegada IN DATE
     ) 
-    RETURN BOOLEAN
+    RETURN vuelo.vuelo_id%TYPE
     IS
+        v_vuelo_id vuelo.vuelo_id%TYPE := vuelo_seq.NEXTVAL;
     BEGIN
-        INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-        VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0);
+        INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS, MOSTRAR)
+        VALUES (v_vuelo_id, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0, 1);
         COMMIT;
-        RETURN TRUE;
+        RETURN v_vuelo_id;
     END crear_vuelo;
 
     PROCEDURE obtener_info_para_crear(
@@ -568,25 +574,36 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         ON v.aeropuerto_llegada_id = b.aeropuerto_id;
     END;
 
-    PROCEDURE actualizar_vuelo(
+    FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
         p_cantidad_pasajeros IN NUMBER,
         p_destino IN VARCHAR2
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
         UPDATE VUELO
         SET CANTIDAD_PASAJEROS = p_cantidad_pasajeros,
             DESTINO = p_destino
         WHERE VUELO_ID = p_vuelo_id;
+        COMMIT;
+        RETURN TRUE;
     END actualizar_vuelo;
 
-    PROCEDURE eliminar_vuelo(
+    FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
-        DELETE FROM VUELO WHERE VUELO_ID = p_vuelo_id;
+        UPDATE VUELO 
+        SET MOSTRAR = 0
+        WHERE VUELO_ID = p_vuelo_id;
+        COMMIT;
+        RETURN TRUE;
     END eliminar_vuelo;
 END vuelo_crud;
+/
 -----------------------------------------------------------------------------------
 --PARA PASAJERO:
 CREATE SEQUENCE pasajero_seq

@@ -22,8 +22,11 @@ create table AEROPUERTO
    NOMBRE               VARCHAR(50)          not null,
    PAIS                 VARCHAR(50)          not null,
    CIUDAD               VARCHAR(50)          not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_AEROPUERTO primary key (AEROPUERTO_ID)
 );
+alter table AEROPUERTO
+    add constraint MOSTRAR_AEROPUERTO CHECK (MOSTRAR IN (0,1));
 /*==============================================================*/
 /* Table: TIPO_AVION                                            */
 /*==============================================================*/
@@ -31,9 +34,11 @@ create table TIPO_AVION
 (
    TIPO_ID              NUMBER(10)         not null,
    TIPO_AVION           VARCHAR2(50)       not null,
+   MOSTRAR              NUMBER(1)          not null,
    constraint PK_TIPO_AVION primary key (TIPO_ID)
 );
-
+alter table TIPO_AVION
+    add constraint MOSTRAR_TIPO_AVION CHECK (MOSTRAR IN (0,1));
 /*==============================================================*/
 /* Table: AVION                                                 */
 /*==============================================================*/
@@ -43,16 +48,18 @@ create table AVION
    TIPO_ID              NUMBER(10)           not null,
    CAPACIDAD_PASAJEROS  NUMBER(10)           not null,
    DISTANCIA_MAXIMA     NUMBER(10)           not null,
-   CAPACIDAD_COMBUSTIBLE NUMBER(10)           not null,
+   CAPACIDAD_COMBUSTIBLE NUMBER(10)          not null,
    VELOCIDAD_CRUCERO    NUMBER(10)           not null,
    CAPACIDAD_BODEGA     NUMBER(10)           not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_AVION primary key (AVION_ID)
 );
 
 alter table AVION
    add constraint FK_AVION_ES_UN_TIPO_AVI foreign key (TIPO_ID)
       references TIPO_AVION (TIPO_ID);
-      
+alter table AVION
+    add constraint MOSTRAR_AVION CHECK (MOSTRAR IN (0,1));    
       
 /*==============================================================*/
 /* Table: GENERO                                                */
@@ -61,15 +68,17 @@ create table GENERO
 (
    GENERO_ID            NUMBER(10)               not null,
    GENERO               VARCHAR2(10)             not null,
+   MOSTRAR              NUMBER(1)                not null,
    constraint PK_GENERO primary key (GENERO_ID)
 );
-
+alter table GENERO
+    add constraint MOSTRAR_GENERO CHECK (MOSTRAR IN (0,1));    
 /*==============================================================*/
 /* Table: PERSONA                                               */
 /*==============================================================*/
 create table PERSONA 
 (
-   PERSONA_ID           NUMBER(10)         not null,
+   PERSONA_ID           NUMBER(10)           not null,
    GENERO_ID            NUMBER(10)           not null,
    NUMERO_IDENTIFICAION NUMBER(10)           not null,
    NOMBRE               VARCHAR(50)          not null,
@@ -77,29 +86,33 @@ create table PERSONA
    FECHA_NAC            DATE                 not null,
    PAIS_NAC             VARCHAR(50)          not null,
    CIUDAD_NAC           VARCHAR(50)          not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_PERSONA primary key (PERSONA_ID)
 );
 
 alter table PERSONA
    add constraint FK_PERSONA_TIENE_GENERO foreign key (GENERO_ID)
       references GENERO (GENERO_ID);
-
+alter table PERSONA
+    add constraint MOSTRAR_PERSONA CHECK (MOSTRAR IN (0,1));    
 /*==============================================================*/
 /* Table: AZAFATA                                               */
 /*==============================================================*/
 create table AZAFATA 
 (
-   PERSONA_ID           NUMBER(10)         not null,
-   AZAFATA_ID           NUMBER(10)         not null,
+   PERSONA_ID           NUMBER(10)           not null,
+   AZAFATA_ID           NUMBER(10)           not null,
    VUELOS_ABORDADOS     NUMBER(10)           not null,
    IDIOMA_NATAL         VARCHAR(50)          not null,
    IDIOMA_SECUNDARIO    VARCHAR(50)          not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_AZAFATA primary key (AZAFATA_ID)
 );
 alter table AZAFATA
    add constraint FK_AZAFATA_ES_UNA_PERSONA foreign key (PERSONA_ID)
       references PERSONA (PERSONA_ID);
-
+alter table AZAFATA
+    add constraint MOSTRAR_AZAFATA CHECK (MOSTRAR IN (0,1));    
 
 /*==============================================================*/
 /* Table: TIPO_LICENCIA                                         */
@@ -108,9 +121,11 @@ create table TIPO_LICENCIA
 (
    LICENCIA_ID          NUMBER(10)           not null,
    LICENCIA             VARCHAR(50)          not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_TIPO_LICENCIA primary key (LICENCIA_ID)
 );
-
+alter table TIPO_LICENCIA
+    add constraint MOSTRAR_TIPO_LICENCIA CHECK (MOSTRAR IN (0,1));    
 /*==============================================================*/
 /* Table: PILOTO                                                */
 /*==============================================================*/
@@ -120,8 +135,9 @@ create table PILOTO
    PILOTO_ID            NUMBER(10)           not null,
    LICENCIA_ID          NUMBER(10)           not null,
    VUELOS               NUMBER(10)           not null,
-   EMISION_LICENCIA     VARCHAR(50)          not null,
-   VENCIMIENTO_LICENCIA VARCHAR(50)          not null,
+   EMISION_LICENCIA     DATE                 not null,
+   VENCIMIENTO_LICENCIA DATE                 not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_PILOTO primary key (PILOTO_ID)
 );
 alter table PILOTO
@@ -131,6 +147,9 @@ alter table PILOTO
 alter table PILOTO
    add constraint FK_PILOTO_TIENE_3_TIPO_LIC foreign key (LICENCIA_ID)
       references TIPO_LICENCIA (LICENCIA_ID);
+
+alter table PILOTO
+    add constraint MOSTRAR_PILOTO CHECK (MOSTRAR IN (0,1));   
 
 /*==============================================================*/
 /* Table: PASAJERO                                              */
@@ -142,6 +161,7 @@ create table PASAJERO
    COMPANION_ID         NUMBER(10),
    COSTO                NUMBER(10)           not null,
    DESTINO              VARCHAR(50)          not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_PASAJERO primary key (PASAJERO_ID)
 );
 alter table PASAJERO
@@ -151,6 +171,9 @@ alter table PASAJERO
 alter table PASAJERO
    add constraint FK_PASAJERO_ES_UN4_PERSONA foreign key (PERSONA_ID)
       references PERSONA (PERSONA_ID);
+
+alter table PASAJERO
+    add constraint MOSTRAR_PASAJERO CHECK (MOSTRAR IN (0,1));  
       
 /*==============================================================*/
 /* Table: PILOTA                                                */
@@ -161,9 +184,9 @@ create table PILOTA
    AVION_ID             NUMBER(10)               not null,
    FECHA_INICIO         DATE                     not null,
    FECHA_FIN            DATE                     not null,
+   MOSTRAR              NUMBER(1)                not null,
    constraint PK_PILOTA primary key (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
 );
-
 
 alter table PILOTA
    add constraint FK_PILOTA_PILOTA_PILOTO foreign key (PILOTO_ID)
@@ -173,6 +196,9 @@ alter table PILOTA
    add constraint FK_PILOTA_PILOTA_AVION foreign key (AVION_ID)
       references AVION (AVION_ID);
 
+alter table PILOTA
+    add constraint MOSTRAR_PILOTA CHECK (MOSTRAR IN (0,1));  
+
 /*==============================================================*/
 /* Table: EQUIPAJE                                              */
 /*==============================================================*/
@@ -181,12 +207,15 @@ create table EQUIPAJE_BODEGA
    EQUIPAJE_ID          NUMBER(10)           not null,
    PASAJERO_ID          NUMBER(10)           not null,
    PESO                 NUMBER(10)           not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_EQUIPAJE_BODEGA primary key (EQUIPAJE_ID)
 );
 alter table EQUIPAJE_BODEGA
    add constraint FK_EQUIPAJE_TIENE_1_PASAJERO foreign key (PASAJERO_ID)
       references PASAJERO (PASAJERO_ID);
-
+      
+alter table EQUIPAJE_BODEGA
+    add constraint MOSTRAR_EQUIPAJE_BODEGA CHECK (MOSTRAR IN (0,1));  
 
 /*==============================================================*/
 /* Table: VUELO                                                 */
@@ -201,6 +230,7 @@ create table VUELO
    FECHA_SALIDA         DATE                 not null,
    FECHA_LLEGADA        DATE                 not null,
    CANTIDAD_PASAJEROS   NUMBER(10)           not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_VUELO primary key (VUELO_ID)
 );
 alter table VUELO
@@ -215,6 +245,9 @@ alter table VUELO
    add constraint FK_VUELO_SALE_AEROPUER foreign key (AEROPUERTO_SALIDA_ID)
       references AEROPUERTO (AEROPUERTO_ID);
 
+alter table VUELO
+    add constraint MOSTRAR_VUELO CHECK (MOSTRAR IN (0,1));  
+
 /*==============================================================*/
 /* Table: SE_ASIGNA                                             */
 /*==============================================================*/
@@ -222,6 +255,7 @@ create table SE_ASIGNA
 (
    AZAFATA_ID           NUMBER(10)           not null,
    VUELO_ID             NUMBER(10)           not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_SE_ASIGNA primary key (AZAFATA_ID, VUELO_ID)
 );
 
@@ -233,6 +267,9 @@ alter table SE_ASIGNA
    add constraint FK_SE_ASIGN_SE_ASIGNA_VUELO foreign key (VUELO_ID)
       references VUELO (VUELO_ID);
 
+alter table SE_ASIGNA
+    add constraint MOSTRAR_SE_ASIGNA CHECK (MOSTRAR IN (0,1));  
+
 /*==============================================================*/
 /* Table: REALIZA                                               */
 /*==============================================================*/
@@ -240,6 +277,7 @@ create table REALIZA
 (
    VUELO_ID             NUMBER(10)           not null,
    PASAJERO_ID          NUMBER(10)           not null,
+   MOSTRAR              NUMBER(1)            not null,
    constraint PK_REALIZA primary key (VUELO_ID, PASAJERO_ID)
 );
 
@@ -251,170 +289,173 @@ alter table REALIZA
    add constraint FK_REALIZA_REALIZA2_VUELO foreign key (VUELO_ID)
       references VUELO (VUELO_ID);
 
+alter table REALIZA
+    add constraint MOSTRAR_REALIZA CHECK (MOSTRAR IN (0,1));  
+
 --aeropuerto
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (1, 'Aeropuerto 1', 'Pais 1', 'Ciudad 1');
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (2, 'Aeropuerto 2', 'Pais 2', 'Ciudad 2');
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (3, 'Aeropuerto 3', 'Pais 3', 'Ciudad 3');
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (4, 'Aeropuerto 4', 'Pais 4', 'Ciudad 4');
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (5, 'Aeropuerto 5', 'Pais 5', 'Ciudad 5');
-INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-VALUES (6, 'Aeropuerto 6', 'Pais 6', 'Ciudad 6');
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (1, 'Aeropuerto 1', 'Pais 1', 'Ciudad 1', 1);
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (2, 'Aeropuerto 2', 'Pais 2', 'Ciudad 2', 1);
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (3, 'Aeropuerto 3', 'Pais 3', 'Ciudad 3', 1);
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (4, 'Aeropuerto 4', 'Pais 4', 'Ciudad 4', 1);
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (5, 'Aeropuerto 5', 'Pais 5', 'Ciudad 5', 1);
+INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+VALUES (6, 'Aeropuerto 6', 'Pais 6', 'Ciudad 6', 1);
 
 --tipo avion
-INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION)
-VALUES (1, 'TipoAvion1');
-INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION)
-VALUES (2, 'TipoAvion2');
-INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION)
-VALUES (3, 'TipoAvion3');
-INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION)
-VALUES (4, 'TipoAvion4');
-INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION)
-VALUES (5, 'TipoAvion5');
+INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION, MOSTRAR)
+VALUES (1, 'TipoAvion1', 1);
+INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION, MOSTRAR)
+VALUES (2, 'TipoAvion2', 1);
+INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION, MOSTRAR)
+VALUES (3, 'TipoAvion3', 1);
+INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION, MOSTRAR)
+VALUES (4, 'TipoAvion4', 1);
+INSERT INTO TIPO_AVION (TIPO_ID, TIPO_AVION, MOSTRAR)
+VALUES (5, 'TipoAvion5', 1);
 
 --avion
-INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA)
-VALUES (1, 1, 150, 3000, 10000, 500, 200);
-INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA)
-VALUES (2, 2, 200, 4000, 12000, 550, 250);
-INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA)
-VALUES (3, 1, 180, 3500, 11000, 520, 230);
+INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA, MOSTRAR)
+VALUES (1, 1, 150, 3000, 10000, 500, 200, 1);
+INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA, MOSTRAR)
+VALUES (2, 2, 200, 4000, 12000, 550, 250, 1);
+INSERT INTO AVION (AVION_ID, TIPO_ID, CAPACIDAD_PASAJEROS, DISTANCIA_MAXIMA, CAPACIDAD_COMBUSTIBLE, VELOCIDAD_CRUCERO, CAPACIDAD_BODEGA, MOSTRAR)
+VALUES (3, 1, 180, 3500, 11000, 520, 230, 1);
 
 --genero
-INSERT INTO GENERO (GENERO_ID, GENERO)
-VALUES (1, 'Masculino');
-INSERT INTO GENERO (GENERO_ID, GENERO)
-VALUES (2, 'Femenino');
+INSERT INTO GENERO (GENERO_ID, GENERO, MOSTRAR)
+VALUES (1, 'Masculino', 1);
+INSERT INTO GENERO (GENERO_ID, GENERO, MOSTRAR)
+VALUES (2, 'Femenino', 1);
 
 --persona
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (1, 1, 123456789, 'Juan', 'Perez',TO_DATE('2000-01-15', 'YYYY-MM-DD'), 'Pais', 'Ciudad');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (2, 2, 987654321, 'Maria', 'Lopez', TO_DATE('1998-05-20', 'YYYY-MM-DD'), 'OtroPais', 'OtraCiudad');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (3, 1, 555555555, 'Pedro', 'Gonzalez', TO_DATE('1995-09-10', 'YYYY-MM-DD'), 'DistintoPais', 'DistintaCiudad');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (4, 2, 111111111, 'Luisa', 'Martï¿½nez', TO_DATE('1990-03-25', 'YYYY-MM-DD'), 'OtroPais2', 'OtraCiudad2');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (5, 1, 999999999, 'Carlos', 'Ramirez', TO_DATE('1987-11-30', 'YYYY-MM-DD'), 'OtroPais3', 'OtraCiudad3');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (6, 2, 888888888, 'Maria', 'Lopez', TO_DATE('1992-05-14', 'YYYY-MM-DD'), 'PaisX', 'CiudadX');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (7, 1, 777777777, 'Pedro', 'Gonzalez', TO_DATE('1990-09-20', 'YYYY-MM-DD'), 'PaisY', 'CiudadY');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (8, 2, 666666666, 'Luisa', 'Martinez', TO_DATE('1988-04-25', 'YYYY-MM-DD'), 'PaisZ', 'CiudadZ');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (9, 1, 555555555, 'Miguel', 'Hernandez', TO_DATE('1985-12-30', 'YYYY-MM-DD'), 'PaisA', 'CiudadA');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (10, 2, 444444444, 'Ana', 'Sanchez', TO_DATE('1983-06-10', 'YYYY-MM-DD'), 'PaisB', 'CiudadB');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (11, 1, 333333333, 'Santiago', 'Perez', TO_DATE('1980-02-18', 'YYYY-MM-DD'), 'PaisC', 'CiudadC');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (12, 2, 222222222, 'Carmen', 'Gomez', TO_DATE('1978-08-05', 'YYYY-MM-DD'), 'PaisD', 'CiudadD');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (13, 1, 111111111, 'Javier', 'Fernï¿½ndez', TO_DATE('1975-04-15', 'YYYY-MM-DD'), 'PaisE', 'CiudadE');
-INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC)
-VALUES (14, 2, 99999999, 'Isabel', 'Ortega', TO_DATE('1973-10-25', 'YYYY-MM-DD'), 'PaisF', 'CiudadF');
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (1, 1, 123456789, 'Juan', 'Perez',TO_DATE('2000-01-15', 'YYYY-MM-DD'), 'Pais', 'Ciudad', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (2, 2, 987654321, 'Maria', 'Lopez', TO_DATE('1998-05-20', 'YYYY-MM-DD'), 'OtroPais', 'OtraCiudad', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (3, 1, 555555555, 'Pedro', 'Gonzalez', TO_DATE('1995-09-10', 'YYYY-MM-DD'), 'DistintoPais', 'DistintaCiudad', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (4, 2, 111111111, 'Luisa', 'Martï¿½nez', TO_DATE('1990-03-25', 'YYYY-MM-DD'), 'OtroPais2', 'OtraCiudad2', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (5, 1, 999999999, 'Carlos', 'Ramirez', TO_DATE('1987-11-30', 'YYYY-MM-DD'), 'OtroPais3', 'OtraCiudad3', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (6, 2, 888888888, 'Maria', 'Lopez', TO_DATE('1992-05-14', 'YYYY-MM-DD'), 'PaisX', 'CiudadX', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (7, 1, 777777777, 'Pedro', 'Gonzalez', TO_DATE('1990-09-20', 'YYYY-MM-DD'), 'PaisY', 'CiudadY', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (8, 2, 666666666, 'Luisa', 'Martinez', TO_DATE('1988-04-25', 'YYYY-MM-DD'), 'PaisZ', 'CiudadZ', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (9, 1, 555555555, 'Miguel', 'Hernandez', TO_DATE('1985-12-30', 'YYYY-MM-DD'), 'PaisA', 'CiudadA', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (10, 2, 444444444, 'Ana', 'Sanchez', TO_DATE('1983-06-10', 'YYYY-MM-DD'), 'PaisB', 'CiudadB', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (11, 1, 333333333, 'Santiago', 'Perez', TO_DATE('1980-02-18', 'YYYY-MM-DD'), 'PaisC', 'CiudadC', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (12, 2, 222222222, 'Carmen', 'Gomez', TO_DATE('1978-08-05', 'YYYY-MM-DD'), 'PaisD', 'CiudadD', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (13, 1, 111111111, 'Javier', 'Fernï¿½ndez', TO_DATE('1975-04-15', 'YYYY-MM-DD'), 'PaisE', 'CiudadE', 1);
+INSERT INTO PERSONA (PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICAION, NOMBRE, APELLIDO, FECHA_NAC, PAIS_NAC, CIUDAD_NAC, MOSTRAR)
+VALUES (14, 2, 99999999, 'Isabel', 'Ortega', TO_DATE('1973-10-25', 'YYYY-MM-DD'), 'PaisF', 'CiudadF', 1);
 
 
 --azafata
-INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (1, 1, 100, 'Espanol', 'Ingles');
-INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (2, 2, 75, 'Frances', 'Aleman');
-INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO)
-VALUES (3, 3, 120, 'Ingles', 'Espanol');
+INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO, MOSTRAR)
+VALUES (1, 1, 100, 'Espanol', 'Ingles', 1);
+INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO, MOSTRAR)
+VALUES (2, 2, 75, 'Frances', 'Aleman', 1);
+INSERT INTO AZAFATA (PERSONA_ID, AZAFATA_ID, VUELOS_ABORDADOS, IDIOMA_NATAL, IDIOMA_SECUNDARIO, MOSTRAR)
+VALUES (3, 3, 120, 'Ingles', 'Espanol', 1);
 
 --tipo licencia
-INSERT INTO TIPO_LICENCIA (LICENCIA_ID, LICENCIA)
-VALUES (1, 'LicenciaTipo1');
-INSERT INTO TIPO_LICENCIA (LICENCIA_ID, LICENCIA)
-VALUES (2, 'LicenciaTipo2');
+INSERT INTO TIPO_LICENCIA (LICENCIA_ID, LICENCIA, MOSTRAR)
+VALUES (1, 'LicenciaTipo1', 1);
+INSERT INTO TIPO_LICENCIA (LICENCIA_ID, LICENCIA, MOSTRAR)
+VALUES (2, 'LicenciaTipo2', 1);
 
 --piloto
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(4, 1, 1, 100, '2023-01-01', '2024-01-01');
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(5, 2, 2, 120, '2023-02-01', '2024-02-01');
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(6, 3, 1, 80, '2023-03-01', '2024-03-01');
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(7, 4, 2, 90, '2023-04-01', '2024-04-01');
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(8, 5, 1, 110, '2023-05-01', '2024-05-01');
-INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA)
-VALUES(9, 6, 1, 110, '2023-05-01', '2024-05-01');
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(4, 1, 1, 100, TO_DATE('2023-01-01','YYYY-MM-DD'),  TO_DATE('2024-01-01','YYYY-MM-DD'), 1);
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(5, 2, 2, 120, TO_DATE('2023-02-01','YYYY-MM-DD'),  TO_DATE('2024-02-01','YYYY-MM-DD'), 1);
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(6, 3, 1, 80, TO_DATE('2023-03-01','YYYY-MM-DD'),  TO_DATE('2024-03-01','YYYY-MM-DD'), 1);
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(7, 4, 2, 90, TO_DATE('2023-04-01','YYYY-MM-DD'),  TO_DATE('2024-04-01','YYYY-MM-DD'), 1);
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(8, 5, 1, 110, TO_DATE('2023-05-01','YYYY-MM-DD'),  TO_DATE('2024-05-01','YYYY-MM-DD'), 1);
+INSERT INTO PILOTO (PERSONA_ID, PILOTO_ID, LICENCIA_ID, VUELOS, EMISION_LICENCIA, VENCIMIENTO_LICENCIA, MOSTRAR)
+VALUES(9, 6, 1, 110, TO_DATE('2023-05-01','YYYY-MM-DD'),  TO_DATE('2024-05-01','YYYY-MM-DD'), 1);
 
 --pilota
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (1, 1, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (2, 1, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (3, 2, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (4, 2, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (5, 3, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
-INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN)
-VALUES (6, 3, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (1, 1, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (2, 1, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (3, 2, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (4, 2, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (5, 3, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
+INSERT INTO PILOTA (PILOTO_ID, AVION_ID, FECHA_INICIO, FECHA_FIN, MOSTRAR)
+VALUES (6, 3, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'), 1);
 
 --vuelo
-INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(1, 1, 2, 1, 'Destino1', TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'), 100);
-INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(2, 3, 4, 2, 'Destino2', TO_DATE('2023-02-01 10:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 18:45:00', 'YYYY-MM-DD HH24:MI:SS'), 120);
-INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-VALUES(3, 5, 6, 3, 'Destino3', TO_DATE('2023-03-01 12:30:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-03-05 20:15:00', 'YYYY-MM-DD HH24:MI:SS'), 80);
+INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS, MOSTRAR)
+VALUES(1, 1, 2, 1, 'Destino1', TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'), 100, 1);
+INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS, MOSTRAR)
+VALUES(2, 3, 4, 2, 'Destino2', TO_DATE('2023-02-01 10:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 18:45:00', 'YYYY-MM-DD HH24:MI:SS'), 120, 1);
+INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS, MOSTRAR)
+VALUES(3, 5, 6, 3, 'Destino3', TO_DATE('2023-03-01 12:30:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-03-05 20:15:00', 'YYYY-MM-DD HH24:MI:SS'), 80, 1);
 
 --se asigna
-INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID)
-VALUES (1, 1);
-INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID)
-VALUES (2, 1);
-INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID)
-VALUES (3, 1);
+INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID, MOSTRAR)
+VALUES (1, 1, 1);
+INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID, MOSTRAR)
+VALUES (2, 1, 1);
+INSERT INTO SE_ASIGNA (AZAFATA_ID, VUELO_ID, MOSTRAR)
+VALUES (3, 1, 1);
 
 --pasajero
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO)
-VALUES (10, 1, 500, 'Destino1');
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO)
-VALUES (11, 2, 600, 'Destino2');
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO)
-VALUES (12, 3, 450, 'Destino3');
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COMPANION_ID, COSTO, DESTINO)
-VALUES (13, 4, 1, 550, 'Destino4');
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO)
-VALUES (14, 5, 700, 'Destino5');
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (10, 1, 500, 'Destino1', 1);
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (11, 2, 600, 'Destino2', 1);
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (12, 3, 450, 'Destino3', 1);
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COMPANION_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (13, 4, 1, 550, 'Destino4', 1);
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (14, 5, 700, 'Destino5', 1);
 
 --realiza
-INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID)
-VALUES (1, 1);
-INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID)
-VALUES (1, 2);
-INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID)
-VALUES (2, 3);
-INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID)
-VALUES (2, 4);
-INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID)
-VALUES (2, 5);
+INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID, MOSTRAR)
+VALUES (1, 1, 1);
+INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID, MOSTRAR)
+VALUES (1, 2, 1);
+INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID, MOSTRAR)
+VALUES (2, 3, 1);
+INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID, MOSTRAR)
+VALUES (2, 4, 1);
+INSERT INTO REALIZA (VUELO_ID, PASAJERO_ID, MOSTRAR)
+VALUES (2, 5, 1);
 
 --equipaje
-INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
-VALUES (1, 2, 20);
-INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
-VALUES (2, 2, 25);
-INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
-VALUES (3, 3, 18);
-INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
-VALUES (4, 4, 22);
-INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO)
-VALUES (5, 5, 30);
+INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO, MOSTRAR)
+VALUES (1, 2, 20, 1);
+INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO, MOSTRAR)
+VALUES (2, 2, 25, 1);
+INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO, MOSTRAR)
+VALUES (3, 3, 18, 1);
+INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO, MOSTRAR)
+VALUES (4, 4, 22, 1);
+INSERT INTO EQUIPAJE_BODEGA (EQUIPAJE_ID, PASAJERO_ID, PESO, MOSTRAR)
+VALUES (5, 5, 30, 1);
 
 --Paquete para operaciones CRUD en la tabla AEROPUERTO
 DROP SEQUENCE aeropuertos_seq;
@@ -430,7 +471,8 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
         aeropuerto_id aeropuerto.aeropuerto_id%TYPE,
         nombre aeropuerto.nombre%TYPE,
         pais aeropuerto.pais%TYPE,
-        ciudad aeropuerto.ciudad%TYPE
+        ciudad aeropuerto.ciudad%TYPE,
+        mostrar aeropuerto.mostrar%TYPE
     );
     -- Procedimiento para crear un nuevo aeropuerto
     FUNCTION crear_aeropuerto(
@@ -463,7 +505,7 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
     )RETURN BOOLEAN;
     
     -- Procedimiento para eliminar un aeropuerto
-    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER);
+    FUNCTION eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) RETURN BOOLEAN;
 END aeropuerto_crud;
 /
 CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
@@ -476,8 +518,8 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     RETURN BOOLEAN
     IS
     BEGIN
-        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD)
-        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad);
+        INSERT INTO AEROPUERTO (AEROPUERTO_ID, NOMBRE, PAIS, CIUDAD, MOSTRAR)
+        VALUES (aeropuertos_seq.NEXTVAL, p_nombre, p_pais, p_ciudad, 1);
         COMMIT;
         RETURN true;
     END crear_aeropuerto;
@@ -561,15 +603,20 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     END actualizar_aeropuerto;
     
     -- Implementación de procedimiento para eliminar un aeropuerto
-    PROCEDURE eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) IS
+    FUNCTION eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) 
+    RETURN BOOLEAN
+    IS
     BEGIN
-        DELETE FROM AEROPUERTO
-        WHERE AEROPUERTO_ID = p_aeropuerto_id;
+        UPDATE AEROPUERTO 
+        SET MOSTRAR = 0;
+        COMMIT;
+        RETURN TRUE;
     END eliminar_aeropuerto;
     
 END aeropuerto_crud;
 /
 
+---------------------------------------------------------------------------------------
 --PARA VUELO
 DROP SEQUENCE vuelo_seq;
 CREATE SEQUENCE vuelo_seq
@@ -586,7 +633,7 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
         p_destino IN VARCHAR2,
         p_fecha_salida IN DATE, 
         p_fecha_llegada IN DATE
-    ) RETURN BOOLEAN;
+    ) RETURN vuelo.vuelo_id%TYPE;
     
     PROCEDURE obtener_info_para_crear(
         p_aeropuertos OUT SYS_REFCURSOR,
@@ -602,15 +649,15 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
         p_vuelos OUT SYS_REFCURSOR
     );
 
-    PROCEDURE actualizar_vuelo(
+    FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
         p_cantidad_pasajeros IN NUMBER,
         p_destino IN VARCHAR2
-    );
+    ) RETURN BOOLEAN;
 
-    PROCEDURE eliminar_vuelo(
+    FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
-    );
+    ) RETURN BOOLEAN;
 END vuelo_crud;
 /
 CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
@@ -622,13 +669,14 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         p_fecha_salida IN DATE,
         p_fecha_llegada IN DATE
     ) 
-    RETURN BOOLEAN
+    RETURN vuelo.vuelo_id%TYPE
     IS
+        v_vuelo_id vuelo.vuelo_id%TYPE := vuelo_seq.NEXTVAL;
     BEGIN
-        INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS)
-        VALUES (vuelo_seq.NEXTVAL, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0);
+        INSERT INTO VUELO (VUELO_ID, AEROPUERTO_SALIDA_ID, AEROPUERTO_LLEGADA_ID, AVION_ID, DESTINO, FECHA_SALIDA, FECHA_LLEGADA, CANTIDAD_PASAJEROS, MOSTRAR)
+        VALUES (v_vuelo_id, p_aeropuerto_salida_id, p_aeropuerto_llegada_id, p_avion_id, p_destino, p_fecha_salida, p_fecha_llegada, 0, 1);
         COMMIT;
-        RETURN TRUE;
+        RETURN v_vuelo_id;
     END crear_vuelo;
 
     PROCEDURE obtener_info_para_crear(
@@ -680,27 +728,36 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         ON v.aeropuerto_llegada_id = b.aeropuerto_id;
     END;
 
-    PROCEDURE actualizar_vuelo(
+    FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
         p_cantidad_pasajeros IN NUMBER,
         p_destino IN VARCHAR2
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
         UPDATE VUELO
         SET CANTIDAD_PASAJEROS = p_cantidad_pasajeros,
             DESTINO = p_destino
         WHERE VUELO_ID = p_vuelo_id;
+        COMMIT;
+        RETURN TRUE;
     END actualizar_vuelo;
 
-    PROCEDURE eliminar_vuelo(
+    FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
-    ) IS
+    ) 
+    RETURN BOOLEAN
+    IS
     BEGIN
-        DELETE FROM VUELO WHERE VUELO_ID = p_vuelo_id;
+        UPDATE VUELO 
+        SET MOSTRAR = 0
+        WHERE VUELO_ID = p_vuelo_id;
+        COMMIT;
+        RETURN TRUE;
     END eliminar_vuelo;
 END vuelo_crud;
 /
-
 -----------------------------------------------------------------------------------
 --TRIGGERS
 DROP TRIGGER verificar_avion_vuelo;
@@ -732,10 +789,3 @@ BEGIN
     END LOOP;
 END;
 /
-
-
-
-
-
-
-
