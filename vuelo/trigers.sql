@@ -97,3 +97,58 @@ BEGIN
     END IF;
 END;
 
+CREATE OR REPLACE TRIGGER verificar_azafata
+    BEFORE INSERT ON se_asigna
+FOR EACH ROW
+DECLARE
+    v_mostrar_vuelo vuelo.mostrar%TYPE;
+    v_fecha_llegada vuelo.fecha_llegada%TYPE;
+    v_fecha_salida vuelo.fecha_salida%TYPE;
+    CURSOR azafatas_vuelos IS
+        SELECT v.fecha_salida, v.fecha_llegada
+        FROM se_asigna sa
+        INNER JOIN vuelo v
+        ON sa.vuelo_id = v.vuelo_id
+        WHERE sa.azafata_id = :NEW.azafata_id;   
+BEGIN 
+    SELECT v.mostrar 
+    INTO v_mostrar_vuelo
+    FROM vuelo v
+    WHERE v.vuelo_id = :NEW.vuelo_id;
+
+    IF v_mostrar_vuelo = 0 THEN
+        RAISE_APPLICATION_ERROR(
+                -20142, 
+                'El vuelo no está disponible'
+            );
+    END IF;
+
+    SELECT v.fecha_salida, v.fecha_llegada
+    INTO v_fecha_salida, v_fecha_llegada
+    FROM vuelo v
+    WHERE v.vuelo_id = :NEW.vuelo_id;
+    
+    FOR azafata_vuelo IN azafatas_vuelos LOOP
+        IF v_fecha_salida 
+        BETWEEN azafata_vuelo.fecha_salida 
+        AND azafata_vuelo.fecha_llegada 
+        OR
+        v_fecha_llegada 
+        BETWEEN azafata_vuelo.fecha_salida 
+        AND azafata_vuelo.fecha_llegada 
+        THEN
+            RAISE_APPLICATION_ERROR(
+                -20141, 
+                'La azafata ya tiene asignado un vuelo en el rango de fechas'
+            );
+        END IF;      
+    END LOOP;
+END;
+
+
+
+
+
+
+
+

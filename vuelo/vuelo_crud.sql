@@ -53,6 +53,11 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
     FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
     ) RETURN BOOLEAN;
+    
+    FUNCTION asignar_azafata(
+        p_vuelo_id IN NUMBER,
+        p_azafata_id IN NUMBER
+    ) RETURN BOOLEAN;
 END vuelo_crud;
 /
 CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
@@ -167,5 +172,18 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         COMMIT;
         RETURN TRUE;
     END eliminar_vuelo;
+    
+    FUNCTION asignar_azafata(
+        p_vuelo_id IN NUMBER,
+        p_azafata_id IN NUMBER
+    )
+    RETURN BOOLEAN
+    IS
+    BEGIN
+        INSERT INTO se_asigna(azafata_id, vuelo_id)
+        VALUES (p_azafata_id, vuelo_id);
+        COMMIT;
+        RETURN TRUE;
+    END asignar_azafata;
 END vuelo_crud;
 /
