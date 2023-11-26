@@ -492,7 +492,9 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
     );
     
     PROCEDURE leer_vuelos(
-        p_vuelos OUT SYS_REFCURSOR
+        p_vuelos OUT SYS_REFCURSOR,
+        p_tamanio_pagina IN NUMBER := 10,
+        p_pagina_actual IN NUMBER := 1
     );
 
     FUNCTION actualizar_vuelo(
@@ -549,29 +551,41 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         SELECT * 
         INTO p_info
         FROM VUELO 
-        WHERE VUELO_ID = p_vuelo_id;
+        WHERE VUELO_ID = p_vuelo_id
+        AND mostrar = 1;
     END leer_vuelo;
 
     PROCEDURE leer_vuelos(
-        p_vuelos OUT SYS_REFCURSOR
+        p_vuelos OUT SYS_REFCURSOR,
+        p_tamanio_pagina IN NUMBER := 10,
+        p_pagina_actual IN NUMBER := 1
     ) IS
     BEGIN
         OPEN p_vuelos FOR
-        SELECT 
-            v.vuelo_id,
-            v.aeropuerto_salida_id,
-            v.aeropuerto_llegada_id,
-            a.nombre aeropuerto_llegada,
-            b.nombre aeropuerto_salida,
-            v.destino,
-            v.fecha_llegada,
-            v.fecha_salida,
-            v.cantidad_pasajeros
-        FROM vuelo v
-        INNER JOIN aeropuerto a
-        ON v.aeropuerto_salida_id = a.aeropuerto_id
-        INNER JOIN aeropuerto b
-        ON v.aeropuerto_llegada_id = b.aeropuerto_id;
+        SELECT *
+        FROM (
+            SELECT 
+                v.vuelo_id,
+                v.aeropuerto_salida_id,
+                v.aeropuerto_llegada_id,
+                a.nombre aeropuerto_llegada,
+                b.nombre aeropuerto_salida,
+                v.destino,
+                v.fecha_llegada,
+                v.fecha_salida,
+                v.cantidad_pasajeros, 
+                v.mostrar,
+                ROW_NUMBER() OVER (ORDER BY FECHA_SALIDA) AS rn
+            FROM vuelo v
+            INNER JOIN aeropuerto a
+            ON v.aeropuerto_salida_id = a.aeropuerto_id
+            INNER JOIN aeropuerto b
+            ON v.aeropuerto_llegada_id = b.aeropuerto_id
+            WHERE v.mostrar = 1
+        )
+        WHERE rn 
+        BETWEEN (p_pagina_actual - 1) * p_tamanio_pagina + 1 
+            AND p_pagina_actual * p_tamanio_pagina;
     END;
 
     FUNCTION actualizar_vuelo(

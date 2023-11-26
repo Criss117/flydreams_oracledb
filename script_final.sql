@@ -481,7 +481,7 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
         p_ciudad IN VARCHAR2
     ) RETURN BOOLEAN;
     
-    -- Procedimiento para leer información de un aeropuerto
+    -- Procedimiento para leer informaciï¿½n de un aeropuerto
     PROCEDURE leer_aeropuerto(
         p_aeropuerto_id IN NUMBER,
         p_aeropuerto_info OUT aeropuerto_type
@@ -496,12 +496,10 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
     
     PROCEDURE leer_aeropuertos(p_aeropuertos OUT SYS_REFCURSOR);
     
-    -- Procedimiento para actualizar información de un aeropuerto
+    -- Procedimiento para actualizar informaciï¿½n de un aeropuerto
     FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
-        p_nombre IN VARCHAR2,
-        p_pais IN VARCHAR2,
-        p_ciudad IN VARCHAR2
+        p_aero_info IN aeropuerto_type
     )RETURN BOOLEAN;
     
     -- Procedimiento para eliminar un aeropuerto
@@ -509,7 +507,7 @@ CREATE OR REPLACE PACKAGE aeropuerto_crud AS
 END aeropuerto_crud;
 /
 CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
-    -- Implementación de procedimiento para crear un aeropuerto
+    -- Implementaciï¿½n de procedimiento para crear un aeropuerto
     FUNCTION crear_aeropuerto(
         p_nombre IN VARCHAR2,
         p_pais IN VARCHAR2,
@@ -524,7 +522,7 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         RETURN true;
     END crear_aeropuerto;
     
-    -- Implementación de función para leer un aeropuerto
+    -- Implementaciï¿½n de funciï¿½n para leer un aeropuerto
     PROCEDURE leer_aeropuerto(
         p_aeropuerto_id IN NUMBER, 
         p_aeropuerto_info OUT aeropuerto_type) 
@@ -533,7 +531,8 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         SELECT * 
         INTO p_aeropuerto_info
         FROM aeropuerto a
-        WHERE a.aeropuerto_id = p_aeropuerto_id;
+        WHERE a.aeropuerto_id = p_aeropuerto_id
+        AND a.mostrar = 1;
     END leer_aeropuerto;
     
     PROCEDURE leer_aeropuertos(
@@ -543,7 +542,8 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
     BEGIN
         OPEN p_aeropuertos FOR
         SELECT * 
-        FROM aeropuerto;
+        FROM aeropuerto
+        WHERE mostrar = 1;
     END;
     
     PROCEDURE obtener_info(
@@ -585,36 +585,39 @@ CREATE OR REPLACE PACKAGE BODY aeropuerto_crud AS
         WHERE v.aeropuerto_salida_id = p_aeropuerto_id;
     END obtener_info;
     
-    -- Implementación de procedimiento para actualizar un aeropuerto
+    -- Implementaciï¿½n de procedimiento para actualizar un aeropuerto
     FUNCTION actualizar_aeropuerto(
         p_aeropuerto_id IN NUMBER,
-        p_nombre IN VARCHAR2,
-        p_pais IN VARCHAR2,
-        p_ciudad IN VARCHAR2
+        p_aero_info IN aeropuerto_type
     )
     RETURN BOOLEAN
     IS
     BEGIN
         UPDATE AEROPUERTO
-        SET NOMBRE = p_nombre, PAIS = p_pais, CIUDAD = p_ciudad
+        SET 
+            NOMBRE = p_aero_info.nombre, 
+            PAIS = p_aero_info.pais, 
+            CIUDAD = p_aero_info.ciudad
         WHERE AEROPUERTO_ID = p_aeropuerto_id;
         COMMIT;
         RETURN TRUE;
     END actualizar_aeropuerto;
     
-    -- Implementación de procedimiento para eliminar un aeropuerto
+    -- Implementaciï¿½n de procedimiento para eliminar un aeropuerto
     FUNCTION eliminar_aeropuerto(p_aeropuerto_id IN NUMBER) 
     RETURN BOOLEAN
     IS
     BEGIN
         UPDATE AEROPUERTO 
-        SET MOSTRAR = 0;
+        SET MOSTRAR = 0
+        WHERE AEROPUERTO_ID = p_aeropuerto_id;
         COMMIT;
         RETURN TRUE;
     END eliminar_aeropuerto;
     
 END aeropuerto_crud;
 /
+
 
 ---------------------------------------------------------------------------------------
 --PARA VUELO
@@ -626,6 +629,19 @@ CREATE SEQUENCE vuelo_seq
     NOCYCLE;
 / 
 CREATE OR REPLACE PACKAGE vuelo_crud AS
+    TYPE vuelo_type IS RECORD
+    (
+        vuelo_id             vuelo.vuelo_id%TYPE,
+        aeropuerto_salida_id vuelo.aeropuerto_salida_id%TYPE,
+        aeropuerto_llegada_id vuelo.aeropuerto_llegada_id%TYPE,
+        avion_id             vuelo.avion_id%TYPE,
+        destino              vuelo.destino%TYPE,
+        fecha_salida         vuelo.fecha_salida%TYPE,
+        fecha_llegada        vuelo.fecha_llegada%TYPE,
+        cantidad_pasajeros   vuelo.cantidad_pasajeros%TYPE,
+        mostrar              vuelo.mostrar%TYPE
+    );
+
     FUNCTION crear_vuelo(
         p_aeropuerto_salida_id IN NUMBER,
         p_aeropuerto_llegada_id IN NUMBER,
@@ -642,7 +658,7 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
 
     PROCEDURE leer_vuelo(
         p_vuelo_id IN NUMBER,
-        p_info OUT vuelo%ROWTYPE
+        p_info OUT vuelo_type
     );
     
     PROCEDURE leer_vuelos(
@@ -653,8 +669,7 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
 
     FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
-        p_cantidad_pasajeros IN NUMBER,
-        p_destino IN VARCHAR2
+        p_vuelo_info IN vuelo_type
     ) RETURN BOOLEAN;
 
     FUNCTION eliminar_vuelo(
@@ -699,13 +714,14 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
 
     PROCEDURE leer_vuelo(
         p_vuelo_id IN NUMBER,
-        p_info OUT vuelo%ROWTYPE
+        p_info OUT vuelo_type
     ) IS
     BEGIN
         SELECT * 
         INTO p_info
         FROM VUELO 
-        WHERE VUELO_ID = p_vuelo_id;
+        WHERE VUELO_ID = p_vuelo_id
+        AND mostrar = 1;
     END leer_vuelo;
 
     PROCEDURE leer_vuelos(
@@ -727,12 +743,14 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
                 v.fecha_llegada,
                 v.fecha_salida,
                 v.cantidad_pasajeros, 
+                v.mostrar,
                 ROW_NUMBER() OVER (ORDER BY FECHA_SALIDA) AS rn
             FROM vuelo v
             INNER JOIN aeropuerto a
             ON v.aeropuerto_salida_id = a.aeropuerto_id
             INNER JOIN aeropuerto b
             ON v.aeropuerto_llegada_id = b.aeropuerto_id
+            WHERE v.mostrar = 1
         )
         WHERE rn 
         BETWEEN (p_pagina_actual - 1) * p_tamanio_pagina + 1 
@@ -741,15 +759,19 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
 
     FUNCTION actualizar_vuelo(
         p_vuelo_id IN NUMBER,
-        p_cantidad_pasajeros IN NUMBER,
-        p_destino IN VARCHAR2
+        p_vuelo_info IN vuelo_type
     ) 
     RETURN BOOLEAN
     IS
     BEGIN
         UPDATE VUELO
-        SET CANTIDAD_PASAJEROS = p_cantidad_pasajeros,
-            DESTINO = p_destino
+        SET 
+            AEROPUERTO_SALIDA_ID = p_vuelo_info.aeropuerto_salida_id,
+            AEROPUERTO_LLEGADA_ID = p_vuelo_info.aeropuerto_llegada_id,
+            AVION_ID = p_vuelo_info.avion_id,
+            DESTINO = p_vuelo_info.destino,
+            FECHA_SALIDA = p_vuelo_info.fecha_salida,
+            FECHA_LLEGADA = p_vuelo_info.fecha_llegada
         WHERE VUELO_ID = p_vuelo_id;
         COMMIT;
         RETURN TRUE;
@@ -771,9 +793,9 @@ END vuelo_crud;
 /
 -----------------------------------------------------------------------------------
 --TRIGGERS
---verifica que el avión asignado no esté asignado a otro vuelo en el mismo intervalo de tiempo
+--verifica que el aviï¿½n asignado no estï¿½ asignado a otro vuelo en el mismo intervalo de tiempo
 CREATE OR REPLACE TRIGGER verificar_vuelo
-    BEFORE INSERT OR UPDATE ON vuelo
+    BEFORE INSERT ON vuelo
 FOR EACH ROW
 DECLARE
     CURSOR aviones IS
@@ -813,6 +835,7 @@ BEGIN
     END IF;
 END;
 /
+SET SERVEROUTPUT ON
 CREATE OR REPLACE TRIGGER verificar_pasajeros_vuelo
     BEFORE UPDATE OF cantidad_pasajeros ON vuelo
 FOR EACH ROW
@@ -834,16 +857,15 @@ BEGIN
     IF :NEW.cantidad_pasajeros > v_capacidad_pasajeros_avion THEN
         RAISE_APPLICATION_ERROR(
             -20204, 
-            'No hay mas puestos en el avión'
+            'No hay mas puestos en el aviï¿½n'
         );
     END IF;
-    
+       
     FOR equipaje_pasajero IN equipaje_pasajeros LOOP
-        SELECT eb.peso
+        SELECT SUM(e.peso)
         INTO v_aux
-        FROM equipaje_bodega eb
-        WHERE eb.pasajero_id = equipaje_pasajero.pasajero_id;
-        
+        FROM equipaje_bodega e
+        WHERE e.pasajero_id = equipaje_pasajero.pasajero_id;
         v_peso_actual := v_peso_actual + v_aux;
     END LOOP;    
     

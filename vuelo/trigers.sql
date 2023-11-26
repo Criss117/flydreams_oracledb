@@ -1,49 +1,61 @@
 -----------------------------------------------------------------------------------
 --TRIGGERS
---DROP TRIGGER verificar_vuelo;
---verifica que el avión asignado no esté asignado a otro vuelo en el mismo intervalo de tiempo
 CREATE OR REPLACE TRIGGER verificar_vuelo
-    BEFORE INSERT OR UPDATE ON vuelo
+    BEFORE INSERT ON vuelo
 FOR EACH ROW
 DECLARE
     CURSOR aviones IS
         SELECT v.fecha_salida, v.fecha_llegada
         FROM vuelo v
         WHERE v.avion_id = :NEW.avion_id;
+    v_capacidad_pasajeros_avion vuelo.cantidad_pasajeros%TYPE;
 BEGIN
     FOR avionInfo IN aviones LOOP
-        IF 
-            :NEW.fecha_salida 
-            BETWEEN avionInfo.fecha_salida 
-            AND avionInfo.fecha_llegada 
-            OR
-            :NEW.fecha_llegada 
-            BETWEEN avionInfo.fecha_salida 
-            AND avionInfo.fecha_llegada 
+        IF :NEW.fecha_salida 
+        BETWEEN avionInfo.fecha_salida 
+        AND avionInfo.fecha_llegada 
+        OR
+        :NEW.fecha_llegada 
+        BETWEEN avionInfo.fecha_salida 
+        AND avionInfo.fecha_llegada 
         THEN
             RAISE_APPLICATION_ERROR(
                 -20202, 
                 'El avion ya tiene asignado un vuelo en el rango de fechas'
             );
-        END IF;
-        
-        IF :NEW.aeropuerto_salida_id = :NEW.aeropuerto_llegada_id THEN
-            RAISE_APPLICATION_ERROR(
-                -20203, 
-                'El aeropuerto de salida no puede ser igual al aeropuerto de llegada'
-            );
-        END IF;
-        
-        IF :NEW.fecha_salida > :NEW.fecha_llegada THEN
-            RAISE_APPLICATION_ERROR(
-                -20201, 
-                'La fecha de salida no puede ser mayor a la fecha de llegada'
-            );
-        END IF;
+        END IF;      
     END LOOP;
+    
+    IF :NEW.aeropuerto_salida_id = :NEW.aeropuerto_llegada_id THEN
+        RAISE_APPLICATION_ERROR(
+            -20203, 
+            'El aeropuerto de salida no puede ser igual al aeropuerto de llegada'
+        );
+    END IF;
+        
+    IF :NEW.fecha_salida > :NEW.fecha_llegada THEN
+        RAISE_APPLICATION_ERROR(
+            -20201, 
+            'La fecha de salida no puede ser mayor a la fecha de llegada'
+        );
+    END IF;
 END;
 /
 
+UPDATE vuelo v 
+SET 
+    v.aeropuerto_salida_id = 1,
+    v.aeropuerto_llegada_id = 2,
+    v.avion_id = 1, 
+    v.destino = 'Destino1',
+    v.fecha_salida = TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'),
+    v.fecha_llegada = TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'),
+    v.cantidad_pasajeros  = 100,
+    v.mostrar = 1
+WHERE v.vuelo_id = 1;
+
+
+SET SERVEROUTPUT ON
 CREATE OR REPLACE TRIGGER verificar_pasajeros_vuelo
     BEFORE UPDATE OF cantidad_pasajeros ON vuelo
 FOR EACH ROW
@@ -68,13 +80,12 @@ BEGIN
             'No hay mas puestos en el avión'
         );
     END IF;
-    
+       
     FOR equipaje_pasajero IN equipaje_pasajeros LOOP
-        SELECT eb.peso
+        SELECT SUM(e.peso)
         INTO v_aux
-        FROM equipaje_bodega eb
-        WHERE eb.pasajero_id = equipaje_pasajero.pasajero_id;
-        
+        FROM equipaje_bodega e
+        WHERE e.pasajero_id = equipaje_pasajero.pasajero_id;
         v_peso_actual := v_peso_actual + v_aux;
     END LOOP;    
     
