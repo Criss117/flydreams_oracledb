@@ -9,8 +9,10 @@ DECLARE
         FROM vuelo v
         WHERE v.avion_id = :NEW.avion_id;
     v_capacidad_pasajeros_avion vuelo.cantidad_pasajeros%TYPE;
+    v_savepoint VARCHAR2(30) := 'TRIGGER_VERIFICAR_VUELO';
 BEGIN
-    FOR avionInfo IN aviones LOOP
+    SAVEPOINT v_savepoint;
+     FOR avionInfo IN aviones LOOP
         IF :NEW.fecha_salida 
         BETWEEN avionInfo.fecha_salida 
         AND avionInfo.fecha_llegada 
@@ -39,23 +41,26 @@ BEGIN
             'La fecha de salida no puede ser mayor a la fecha de llegada'
         );
     END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_savepoint;
+        RAISE;
 END;
 /
 
-UPDATE vuelo v 
-SET 
-    v.aeropuerto_salida_id = 1,
-    v.aeropuerto_llegada_id = 2,
-    v.avion_id = 1, 
-    v.destino = 'Destino1',
-    v.fecha_salida = TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'),
-    v.fecha_llegada = TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'),
-    v.cantidad_pasajeros  = 100,
-    v.mostrar = 1
-WHERE v.vuelo_id = 1;
+--UPDATE vuelo v 
+--SET 
+    --v.aeropuerto_salida_id = 1,
+    --v.aeropuerto_llegada_id = 2,
+    --v.avion_id = 1, 
+    --v.destino = 'Destino1',
+    --v.fecha_salida = TO_DATE('2023-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS'),
+    --v.fecha_llegada = TO_DATE('2023-01-05 16:30:00', 'YYYY-MM-DD HH24:MI:SS'),
+    --v.cantidad_pasajeros  = 100,
+    --v.mostrar = 1
+--WHERE v.vuelo_id = 1;
 
 
-SET SERVEROUTPUT ON
 CREATE OR REPLACE TRIGGER verificar_pasajeros_vuelo
     BEFORE UPDATE OF cantidad_pasajeros ON vuelo
 FOR EACH ROW
@@ -68,7 +73,11 @@ DECLARE
         SELECT r.pasajero_id
         FROM realiza r
         WHERE r.vuelo_id = :OLD.avion_id;
+    v_savepoint VARCHAR2(30) := 'TRIGGER_VERIFICAR_PASAJEROS_VUELO';
 BEGIN
+    -- Establecer un SAVEPOINT al principio del trigger
+    SAVEPOINT v_savepoint;
+
     SELECT a.capacidad_pasajeros, a.capacidad_bodega
     INTO v_capacidad_pasajeros_avion, v_capacidad_equipaje_avion
     FROM avion a
@@ -77,7 +86,7 @@ BEGIN
     IF :NEW.cantidad_pasajeros > v_capacidad_pasajeros_avion THEN
         RAISE_APPLICATION_ERROR(
             -20204, 
-            'No hay mas puestos en el avión'
+            'No hay más puestos en el avión'
         );
     END IF;
        
@@ -95,8 +104,17 @@ BEGIN
             'Capacidad de carga excedida'
         );
     END IF;
-END;
 
+    -- Commit al final si no hay errores
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Rollback a SAVEPOINT en caso de error
+        ROLLBACK TO SAVEPOINT v_savepoint;
+        RAISE;
+END;
+/
 CREATE OR REPLACE TRIGGER verificar_azafata
     BEFORE INSERT ON se_asigna
 FOR EACH ROW
@@ -109,8 +127,12 @@ DECLARE
         FROM se_asigna sa
         INNER JOIN vuelo v
         ON sa.vuelo_id = v.vuelo_id
-        WHERE sa.azafata_id = :NEW.azafata_id;   
-BEGIN 
+        WHERE sa.azafata_id = :NEW.azafata_id;
+    v_savepoint VARCHAR2(30) := 'TRIGGER_VERIFICAR_AZAFATA';
+BEGIN
+    -- Establecer un SAVEPOINT al principio del trigger
+    SAVEPOINT v_savepoint;
+
     SELECT v.mostrar 
     INTO v_mostrar_vuelo
     FROM vuelo v
@@ -127,7 +149,7 @@ BEGIN
     INTO v_fecha_salida, v_fecha_llegada
     FROM vuelo v
     WHERE v.vuelo_id = :NEW.vuelo_id;
-    
+
     FOR azafata_vuelo IN azafatas_vuelos LOOP
         IF v_fecha_salida 
         BETWEEN azafata_vuelo.fecha_salida 
@@ -143,6 +165,15 @@ BEGIN
             );
         END IF;      
     END LOOP;
+
+    -- Commit al final si no hay errores
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Rollback a SAVEPOINT en caso de error
+        ROLLBACK TO SAVEPOINT v_savepoint;
+        RAISE;
 END;
 
 

@@ -677,6 +677,8 @@ CREATE OR REPLACE PACKAGE vuelo_crud AS
     FUNCTION eliminar_vuelo(
         p_vuelo_id IN NUMBER
     ) RETURN BOOLEAN;
+    
+   
 END vuelo_crud;
 /
 CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
@@ -791,126 +793,140 @@ CREATE OR REPLACE PACKAGE BODY vuelo_crud AS
         COMMIT;
         RETURN TRUE;
     END eliminar_vuelo;
+    
+   
 END vuelo_crud;
 /
------------------------------------------------------------------------------------------
---PARA AZAFATA
-DROP SEQUENCE azafata_seq;
-CREATE SEQUENCE azafata_seq
-    START WITH 4
+
+--PARA PERSONA:
+DROP SEQUENCE persona_seq;
+CREATE SEQUENCE persona_seq
+    START WITH 15
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
-CREATE OR REPLACE PACKAGE AZAFATA_CRUD AS
-    TYPE azafata_type IS RECORD 
-    (
-       persona_id            persona.persona_id%TYPE,
-       genero_id             persona.genero_id%TYPE,
-       numero_identificacion persona.numero_identificacion%TYPE,
-       nombre                persona.nombre%TYPE,
-       apellido              persona.apellido%TYPE,
-       fecha_nac             persona.fecha_nac%TYPE,
-       pais_nac              persona.pais_nac%TYPE,
-       ciudad_nac            persona.ciudad_nac%TYPE,
-       azafata_id            azafata.azafata_id%TYPE,
-       vuelos_abordados      azafata.vuelos_abordados%TYPE,
-       idioma_natal          azafata.idioma_natal%TYPE,
-       idioma_secundario     azafata.idioma_secundario%TYPE,
-       mostrar               azafata.mostrar%TYPE
-    );
-    
-    PROCEDURE leer_azafata(
-        p_azafata_id IN NUMBER,
-        p_info OUT azafata_type
-    );
-    
-    PROCEDURE leer_azafatas(
-        p_azafatas OUT SYS_REFCURSOR,
-        p_tamanio_pagina IN NUMBER := 10,
-        p_pagina_actual IN NUMBER := 1
-    );
-    
-    FUNCTION eliminar_azafata(
-        p_azafata_id IN NUMBER
-    ) RETURN BOOLEAN;
-END AZAFATA_CRUD;
 /
-CREATE OR REPLACE PACKAGE BODY AZAFATA_CRUD AS
-    PROCEDURE leer_azafata(
-        p_azafata_id IN NUMBER,
-        p_info OUT azafata_type
-    ) IS
-    BEGIN
-        SELECT 
-            p.persona_id,
-            p.genero_id,
-            p.numero_identificacion,
-            p.nombre,
-            p.apellido,
-            p.fecha_nac,
-            p.pais_nac,
-            p.ciudad_nac,
-            a.azafata_id,
-            a.vuelos_abordados,
-            a.idioma_natal,
-            a.idioma_secundario,
-            a.mostrar
-        INTO p_info
-        FROM azafata a 
-        INNER JOIN persona p
-        ON a.persona_id = p.persona_id
-        WHERE a.azafata_id = p_azafata_id
-        AND a.mostrar = 1 
-        AND p.mostrar = 1;
-    END leer_azafata;
+CREATE OR REPLACE PACKAGE PERSONA_CRUD AS
+    TYPE persona_type IS RECORD 
+    (
+       persona_id           persona.persona_id%TYPE,
+       genero_id            persona.genero_id%TYPE,
+       numero_identificacion persona.numero_identificacion%TYPE,
+       nombre               persona.nombre%TYPE,
+       apellido             persona.apellido%TYPE,
+       fecha_nac            persona.fecha_nac%TYPE,
+       pais_nac             persona.pais_nac%TYPE,
+       ciudad_nac           persona.ciudad_nac%TYPE,
+       mostrar              persona.mostrar%TYPE
+    );
+
+    FUNCTION crear_persona(
+        p_persona_info persona_type
+    ) RETURN NUMBER;
     
-    PROCEDURE leer_azafatas(
-        p_azafatas OUT SYS_REFCURSOR,
-        p_tamanio_pagina IN NUMBER := 10,
-        p_pagina_actual IN NUMBER := 1
-    )IS
+    FUNCTION eliminar_persona(
+        p_persona_id persona.persona_id%TYPE
+    )RETURN BOOLEAN;
+END PERSONA_CRUD;
+/
+CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
+    FUNCTION crear_persona(
+        p_persona_info persona_type
+    ) 
+    RETURN NUMBER
+    IS
+        v_persona_id persona.persona_id%TYPE := persona_seq.NEXTVAL;
     BEGIN
-        OPEN p_azafatas FOR
-        SELECT *
-        FROM (
-            SELECT 
-                p.persona_id,
-                p.genero_id,
-                p.numero_identificacion,
-                p.nombre,
-                p.apellido,
-                p.fecha_nac,
-                p.pais_nac,
-                p.ciudad_nac,
-                a.azafata_id,
-                a.vuelos_abordados,
-                a.idioma_natal,
-                a.idioma_secundario,
-                a.mostrar,
-                ROW_NUMBER() OVER (ORDER BY p.persona_id) AS rn
-            FROM azafata a 
-            INNER JOIN persona p
-            ON a.persona_id = p.persona_id
-            AND a.mostrar = 1 
-            AND p.mostrar = 1
-        )
-        WHERE rn 
-        BETWEEN (p_pagina_actual - 1) * p_tamanio_pagina + 1 
-            AND p_pagina_actual * p_tamanio_pagina;
-    END leer_azafatas;
+        SAVEPOINT v_before_insert_persona;
+        INSERT INTO persona (persona_id, genero_id, numero_identificacion, nombre, apellido, fecha_nac, pais_nac, ciudad_nac, mostrar)
+        VALUES (
+            v_persona_id, 
+            p_persona_info.genero_id, 
+            p_persona_info.numero_identificacion, 
+            p_persona_info.nombre,
+            p_persona_info.apellido,
+            p_persona_info.fecha_nac,
+            p_persona_info.pais_nac,
+            p_persona_info.ciudad_nac,
+            1);
+        RETURN v_persona_id;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_insert_persona;
+        RAISE;
+    END crear_persona;
     
-    FUNCTION eliminar_azafata(p_azafata_id IN NUMBER)
-        RETURN BOOLEAN
+     FUNCTION eliminar_persona(
+        p_persona_id persona.persona_id%TYPE
+    )RETURN BOOLEAN
     IS
     BEGIN
-        UPDATE AZAFATA 
-        SET MOSTRAR = 0
-        WHERE AZAFATA_ID = p_azafata_id;
-        COMMIT;
-        RETURN TRUE;    
+        SAVEPOINT v_before_delete_persona;
+        UPDATE persona p 
+        SET p.mostrar = 0
+        WHERE p.persona_id = p_persona_id;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_insert_persona;
+        RAISE;
     END;
-    
-END AZAFATA_CRUD;
+END PERSONA_CRUD;
+/
+
+--PARA PERSONA:
+DROP SEQUENCE persona_seq;
+CREATE SEQUENCE persona_seq
+    START WITH 15
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+/
+CREATE OR REPLACE PACKAGE PERSONA_CRUD AS
+    TYPE persona_type IS RECORD 
+    (
+       persona_id           persona.persona_id%TYPE,
+       genero_id            persona.genero_id%TYPE,
+       numero_identificacion persona.numero_identificacion%TYPE,
+       nombre               persona.nombre%TYPE,
+       apellido             persona.apellido%TYPE,
+       fecha_nac            persona.fecha_nac%TYPE,
+       pais_nac             persona.pais_nac%TYPE,
+       ciudad_nac           persona.ciudad_nac%TYPE,
+       mostrar              persona.mostrar%TYPE
+    );
+
+    FUNCTION crear_persona(
+        p_persona_info persona_type
+    ) RETURN NUMBER;
+END PERSONA_CRUD;
+/
+CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
+    FUNCTION crear_persona(
+        p_persona_info persona_type
+    ) 
+    RETURN NUMBER
+    IS
+        v_persona_id persona.persona_id%TYPE := persona_seq.NEXTVAL;
+    BEGIN
+        SAVEPOINT v_before_insert_persona;
+        INSERT INTO persona (persona_id, genero_id, numero_identificacion, nombre, apellido, fecha_nac, pais_nac, ciudad_nac, mostrar)
+        VALUES (
+            v_persona_id, 
+            p_persona_info.genero_id, 
+            p_persona_info.numero_identificacion, 
+            p_persona_info.nombre,
+            p_persona_info.apellido,
+            p_persona_info.fecha_nac,
+            p_persona_info.pais_nac,
+            p_persona_info.ciudad_nac,
+            1);
+        RETURN v_persona_id;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_insert_persona;
+        RAISE;
+    END crear_persona;
+END PERSONA_CRUD;
 /
 -----------------------------------------------------------------------------------
 --TRIGGERS
@@ -977,7 +993,7 @@ BEGIN
     IF :NEW.cantidad_pasajeros > v_capacidad_pasajeros_avion THEN
         RAISE_APPLICATION_ERROR(
             -20204, 
-            'No hay mas puestos en el aviï¿½n'
+            'No hay mas puestos en el avion'
         );
     END IF;
        
@@ -1022,7 +1038,7 @@ BEGIN
                 'El vuelo no está disponible'
             );
     END IF;
-
+    
     SELECT v.fecha_salida, v.fecha_llegada
     INTO v_fecha_salida, v_fecha_llegada
     FROM vuelo v
