@@ -454,3 +454,85 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20062, 'No hay asientos disponibles en este vuelo.');
     END IF;
 END;
+
+
+
+
+--Procedimiento: Procedimiento: Leer los datos de un pasajero y los vuelos asignados, el procedimiento recibe pasajero_id y retorna un tipo compuesto con los datos del pasajero
+-- Crear un tipo de registro para almacenar los datos del pasajero
+CREATE OR REPLACE TYPE PasajeroInfo AS OBJECT (
+    PersonaID NUMBER,
+    GeneroID NUMBER,
+    NumeroIdentificacion NUMBER,
+    Nombre VARCHAR2(50),
+    Apellido VARCHAR2(50),
+    FechaNacimiento DATE,
+    PaisNacimiento VARCHAR2(50),
+    CiudadNacimiento VARCHAR2(50)
+);
+
+-- Crear un tipo de tabla para almacenar varios registros de tipo PasajeroInfo
+CREATE OR REPLACE TYPE PasajeroInfoList AS TABLE OF PasajeroInfo;
+
+-- Crear un procedimiento que devuelve datos del pasajero, equipaje y vuelos
+CREATE OR REPLACE PROCEDURE ObtenerInfoPasajero(
+    p_PasajeroID IN NUMBER,
+    p_PasajeroInfo OUT PasajeroInfo,
+    p_VuelosCursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+     -- Inicializar el objeto PasajeroInfo
+    p_PasajeroInfo := PasajeroInfo(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    -- Obtener datos del pasajero
+    SELECT PERSONA_ID, GENERO_ID, NUMERO_IDENTIFICACION, NOMBRE, APELLIDO, FECHA_NAC,
+           PAIS_NAC, CIUDAD_NAC
+    INTO p_PasajeroInfo.PersonaID, p_PasajeroInfo.GeneroID,
+         p_PasajeroInfo.NumeroIdentificacion, p_PasajeroInfo.Nombre,
+         p_PasajeroInfo.Apellido, p_PasajeroInfo.FechaNacimiento,
+         p_PasajeroInfo.PaisNacimiento, p_PasajeroInfo.CiudadNacimiento
+    FROM PERSONA
+    WHERE PERSONA_ID = p_PasajeroID;
+
+    -- Abrir el cursor para los datos de los vuelos
+    OPEN p_VuelosCursor FOR
+        SELECT V.*
+        FROM VUELO V
+        JOIN REALIZA R ON V.VUELO_ID = R.VUELO_ID
+        WHERE R.PASAJERO_ID = p_PasajeroID;
+END ObtenerInfoPasajero;
+--Se utiliza el procedimiento asi:
+-- Declarar variables para almacenar la información del pasajero y los vuelos
+DECLARE
+    v_PasajeroInfo PasajeroInfo;
+    v_VuelosCursor SYS_REFCURSOR;
+    v_VueloRec VUELO%ROWTYPE;
+BEGIN
+    -- Llamar al procedimiento y abrir el cursor
+    ObtenerInfoPasajero(1, v_PasajeroInfo, v_VuelosCursor);
+
+    -- Acceder a los datos del pasajero
+    DBMS_OUTPUT.PUT_LINE('Nombre del Pasajero: ' || v_PasajeroInfo.Nombre);
+    DBMS_OUTPUT.PUT_LINE('Apellido del Pasajero: ' || v_PasajeroInfo.Apellido);
+    -- Otros campos del pasajero
+    
+    -- Acceder a los datos de los vuelos con un bucle FOR
+    LOOP
+        FETCH v_VuelosCursor INTO v_VueloRec;
+        EXIT WHEN v_VuelosCursor%NOTFOUND;
+
+        -- Mostrar información del vuelo
+        DBMS_OUTPUT.PUT_LINE('Vuelo ID: ' || v_VueloRec.VUELO_ID);
+        DBMS_OUTPUT.PUT_LINE('Aeropuerto de Salida: ' || v_VueloRec.AEROPUERTO_SALIDA_ID);
+        -- Otros campos del vuelo
+        DBMS_OUTPUT.PUT_LINE('Aeropuerto de Llegada: ' || v_VueloRec.AEROPUERTO_LLEGADA_ID);
+        DBMS_OUTPUT.PUT_LINE('Destino: ' || v_VueloRec.DESTINO);
+        DBMS_OUTPUT.PUT_LINE('Fecha de Salida: ' || TO_CHAR(v_VueloRec.FECHA_SALIDA, 'DD-MON-YYYY HH24:MI:SS'));
+        DBMS_OUTPUT.PUT_LINE('Fecha de Llegada: ' || TO_CHAR(v_VueloRec.FECHA_LLEGADA, 'DD-MON-YYYY HH24:MI:SS'));
+        DBMS_OUTPUT.PUT_LINE('Cantidad de Pasajeros: ' || v_VueloRec.CANTIDAD_PASAJEROS);
+        DBMS_OUTPUT.PUT_LINE('-----------------------------');
+    END LOOP;
+
+    -- Cerrar el cursor
+    CLOSE v_VuelosCursor;
+END;
