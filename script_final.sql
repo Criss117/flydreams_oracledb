@@ -158,15 +158,11 @@ create table PASAJERO
 (
    PERSONA_ID           NUMBER(10)           not null,
    PASAJERO_ID          NUMBER(10)           not null,
-   COMPANION_ID         NUMBER(10),
    COSTO                NUMBER(10)           not null,
    DESTINO              VARCHAR(50)          not null,
    MOSTRAR              NUMBER(1)            not null,
    constraint PK_PASAJERO primary key (PASAJERO_ID)
 );
-alter table PASAJERO
-   add constraint FK_PASAJERO_ACOMPANIA_PASAJERO foreign key (COMPANION_ID)
-      references PASAJERO (PASAJERO_ID);
 
 alter table PASAJERO
    add constraint FK_PASAJERO_ES_UN4_PERSONA foreign key (PERSONA_ID)
@@ -430,8 +426,8 @@ INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
 VALUES (11, 2, 600, 'Destino2', 1);
 INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
 VALUES (12, 3, 450, 'Destino3', 1);
-INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COMPANION_ID, COSTO, DESTINO, MOSTRAR)
-VALUES (13, 4, 1, 550, 'Destino4', 1);
+INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
+VALUES (13, 4, 550, 'Destino4', 1);
 INSERT INTO PASAJERO (PERSONA_ID, PASAJERO_ID, COSTO, DESTINO, MOSTRAR)
 VALUES (14, 5, 700, 'Destino5', 1);
 
@@ -1182,6 +1178,220 @@ CREATE OR REPLACE PACKAGE BODY AZAFATA_CRUD AS
     
 END AZAFATA_CRUD;
 /
+-- PARA PASAJERO
+DROP SEQUENCE pasajero_seq;
+DROP SEQUENCE equipaje_seq;
+CREATE SEQUENCE pasajero_seq
+    START WITH 6
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE SEQUENCE equipaje_seq
+    START WITH 6
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+/
+CREATE OR REPLACE PACKAGE PASAJERO_CRUD AS
+    TYPE pasajero_type IS RECORD 
+    (
+        persona_id      pasajero.persona_id%TYPE,
+        pasajero_id     pasajero.pasajero_id%TYPE,
+        costo           pasajero.costo%TYPE,
+        destino         pasajero.destino%TYPE,
+        peso            equipaje_bodega.peso%TYPE,
+        mostrar         pasajero.mostrar%TYPE
+    );
+
+    FUNCTION crear_pasajero(
+        p_persona_info IN PERSONA_CRUD.persona_type,
+        p_pasajero_info IN pasajero_type
+    ) RETURN NUMBER;
+    
+    PROCEDURE leer_pasajero(
+        p_pasajero_id IN NUMBER,
+        p_pasajero_info OUT pasajero_type,
+        p_persona_info OUT PERSONA_CRUD.persona_type
+    );
+    
+    PROCEDURE leer_pasajeros(
+        p_pasajeros OUT SYS_REFCURSOR,
+        p_tamanio_pagina IN NUMBER := 10,
+        p_pagina_actual IN NUMBER := 1
+    );
+    
+    FUNCTION asignar_vuelo(
+        p_pasajero_id pasajero.pasajero_id%TYPE,
+        p_vuelo_id vuelo.vuelo_id%TYPE
+    )RETURN BOOLEAN;
+    
+    FUNCTION eliminar_pasajero(
+        p_pasajero_id IN NUMBER
+    ) RETURN BOOLEAN;
+    
+    FUNCTION actualizar_pasajero(
+        p_persona_info IN PERSONA_CRUD.persona_type,
+        p_pasajero_info IN pasajero_type
+    )RETURN BOOLEAN;
+END PASAJERO_CRUD;
+/
+
+CREATE OR REPLACE PACKAGE BODY PASAJERO_CRUD AS
+    FUNCTION crear_pasajero(
+        p_persona_info IN PERSONA_CRUD.persona_type,
+        p_pasajero_info IN pasajero_type
+    )
+    RETURN NUMBER
+    IS
+        v_persona_id persona.persona_id%TYPE;
+        v_pasajero_id pasajero.pasajero_id%TYPE;
+        v_before_insert_pasajero VARCHAR2(30) := 'BEFORE_INSERT_PASAJERO';
+    BEGIN
+        SAVEPOINT v_before_insert_pasajero;
+        v_persona_id := PERSONA_CRUD.crear_persona(p_persona_info);
+        v_pasajero_id := pasajero_seq.NEXTVAL;
+        INSERT INTO pasajero (persona_id, pasajero_id, costo, destino, mostrar)
+        VALUES (
+            v_persona_id, 
+            v_pasajero_id,
+            p_pasajero_info.costo,
+            p_pasajero_info.destino,
+            1);
+       
+        INSERT INTO equipaje_bodega(equipaje_id, pasajero_id, peso, mostrar)
+        VALUES (equipaje_seq.NEXTVAL, v_pasajero_id, p_pasajero_info.peso, 1);
+        COMMIT;
+        RETURN v_pasajero_id;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_insert_pasajero;
+        RAISE;
+    END;
+
+    PROCEDURE leer_pasajero(
+        p_pasajero_id IN NUMBER,
+        p_pasajero_info OUT pasajero_type,
+        p_persona_info OUT PERSONA_CRUD.persona_type
+    ) IS
+    BEGIN
+        SELECT 
+            p.persona_id,
+            p.genero_id,
+            p.numero_identificacion,
+            p.nombre,
+            p.apellido,
+            p.fecha_nac,
+            p.pais_nac,
+            p.ciudad_nac,
+            pa.persona_id,
+            pa.pasajero_id,
+            pa.costo,
+            pa.destino,
+            pa.mostrar
+        INTO 
+            p_persona_info.persona_id, 
+            p_persona_info.genero_id,
+            p_persona_info.numero_identificacion,
+            p_persona_info.nombre,
+            p_persona_info.apellido,
+            p_persona_info.fecha_nac,
+            p_persona_info.pais_nac,
+            p_persona_info.ciudad_nac,
+            p_pasajero_info.persona_id,
+            p_pasajero_info.pasajero_id,
+            p_pasajero_info.costo,
+            p_pasajero_info.destino,
+            p_pasajero_info.mostrar
+        FROM pasajero pa
+        INNER JOIN persona p
+        ON pa.persona_id = p.persona_id
+        WHERE pa.pasajero_id = p_pasajero_id
+        AND pa.mostrar = 1 
+        AND p.mostrar = 1;
+    END leer_pasajero;
+    
+    PROCEDURE leer_pasajeros(
+        p_pasajeros OUT SYS_REFCURSOR,
+        p_tamanio_pagina IN NUMBER := 10,
+        p_pagina_actual IN NUMBER := 1
+    )IS
+    BEGIN
+        OPEN p_pasajeros FOR
+        SELECT *
+        FROM (
+            SELECT 
+                p.persona_id,
+                p.genero_id,
+                p.numero_identificacion,
+                p.nombre,
+                p.apellido,
+                p.fecha_nac,
+                p.pais_nac,
+                p.ciudad_nac,
+                pa.pasajero_id,
+                pa.costo,
+                pa.destino,
+                pa.mostrar,
+                ROW_NUMBER() OVER (ORDER BY p.persona_id) AS rn
+            FROM pasajero pa 
+            INNER JOIN persona p
+            ON pa.persona_id = p.persona_id
+            AND pa.mostrar = 1 
+            AND p.mostrar = 1
+        )
+        WHERE rn 
+        BETWEEN (p_pagina_actual - 1) * p_tamanio_pagina + 1 
+            AND p_pagina_actual * p_tamanio_pagina;
+    END leer_pasajeros;
+    
+    FUNCTION eliminar_pasajero(p_pasajero_id IN NUMBER)
+        RETURN BOOLEAN
+    IS
+    BEGIN
+        UPDATE PASAJERO 
+        SET MOSTRAR = 0
+        WHERE pasajero_id = p_pasajero_id;
+        COMMIT;
+        RETURN TRUE;    
+    END;
+    
+    FUNCTION asignar_vuelo(
+        p_pasajero_id pasajero.pasajero_id%TYPE,
+        p_vuelo_id vuelo.vuelo_id%TYPE
+    )RETURN BOOLEAN
+    IS
+    BEGIN
+        INSERT INTO realiza(vuelo_id, pasajero_id, mostrar)
+        VALUES(p_vuelo_id, p_pasajero_id, 1);
+        COMMIT;
+    RETURN TRUE;
+    END;
+    
+    FUNCTION actualizar_pasajero(
+        p_persona_info IN PERSONA_CRUD.persona_type,
+        p_pasajero_info IN pasajero_type
+    )RETURN BOOLEAN
+    IS
+        v_res BOOLEAN;
+    BEGIN
+        SAVEPOINT v_before_update_pasajero;
+        v_res := PERSONA_CRUD.editar_persona(p_persona_info);
+        
+        UPDATE pasajero pa SET
+            pa.companion_id = p_pasajero_info.companion_id,
+            pa.costo = p_pasajero_info.costo,
+            pa.destino = p_pasajero_info.destino
+        WHERE pa.pasajero_id = p_pasajero_info.pasajero_id;
+        COMMIT;
+        RETURN TRUE;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_update_pasajero;
+        RAISE;
+    END;
+END PASAJERO_CRUD;
+/
 -----------------------------------------------------------------------------------
 --TRIGGERS
 CREATE OR REPLACE TRIGGER verificar_vuelo
@@ -1312,5 +1522,64 @@ BEGIN
             );
         END IF;      
     END LOOP;
+END;
+/
+CREATE OR REPLACE TRIGGER TRG_VERIFICAR_DISPONIBILIDAD
+BEFORE INSERT OR UPDATE ON REALIZA
+FOR EACH ROW
+DECLARE
+    v_asientos_ocupados NUMBER;
+    v_capacidad_pasajeros NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_asientos_ocupados
+    FROM realiza r
+    WHERE r.vuelo_id = :NEW.vuelo_id;
+    
+    SELECT a.capacidad_pasajeros
+    INTO v_capacidad_pasajeros
+    FROM vuelo v
+    INNER JOIN avion a
+    ON v.avion_id = a.avion_id
+    WHERE v.vuelo_id = :NEW.vuelo_id;
+    
+    IF v_asientos_ocupados > v_capacidad_pasajeros THEN
+        RAISE_APPLICATION_ERROR(-20062, 'No hay asientos disponibles en este vuelo.');
+    END IF;
+END;
+/
+CREATE OR REPLACE TRIGGER verificar_disponibilidad_piloto
+    BEFORE INSERT ON pilota
+FOR EACH ROW
+DECLARE
+    v_asignado NUMBER;
+BEGIN
+    -- Verificar si el piloto ya está asignado a otro vuelo
+    SELECT COUNT(*)
+    INTO v_asignado
+    FROM pilota
+    WHERE piloto_id = :NEW.piloto_id;
+
+    IF v_asignado > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20145,
+            'El piloto ya está asignado a otro vueloy no se encuentra disponible'
+        );
+    END IF;
+
+    -- Verificar disponibilidad y validez de la licencia
+    SELECT COUNT(*)
+    INTO v_asignado
+    FROM piloto
+    WHERE piloto_id = :NEW.piloto_id
+      AND vuelos > 0
+      AND SYSDATE BETWEEN emision_licencia AND vencimiento_licencia;
+
+    IF v_asignado = 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20144,
+            'El piloto no está disponible o la licencia no es válida'
+        );
+    END IF;
 END;
 /

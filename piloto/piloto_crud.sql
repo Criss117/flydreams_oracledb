@@ -16,7 +16,8 @@ CREATE OR REPLACE PACKAGE PILOTO_CRUD AS
         vuelos               piloto.vuelos%TYPE,
         emision_licencia     piloto.emision_licencia%TYPE,
         vencimiento_licencia piloto.vencimiento_licencia%TYPE,
-        mostrar              piloto.mostrar%TYPE
+        mostrar              piloto.mostrar%TYPE,
+        licencia             tipo_licencia.licencia%TYPE
     );
 
     FUNCTION crear_piloto(
@@ -102,7 +103,8 @@ CREATE OR REPLACE PACKAGE BODY PILOTO_CRUD AS
             pi.vuelos,
             pi.emision_licencia,
             pi.vencimiento_licencia,
-            pi.mostrar
+            pi.mostrar,
+            tl.licencia
         INTO 
             p_persona_info.persona_id, 
             p_persona_info.genero_id,
@@ -118,10 +120,13 @@ CREATE OR REPLACE PACKAGE BODY PILOTO_CRUD AS
             p_piloto_info.vuelos,
             p_piloto_info.emision_licencia,
             p_piloto_info.vencimiento_licencia,
-            p_piloto_info.mostrar
+            p_piloto_info.mostrar,
+            p_piloto_info.licencia
         FROM piloto pi
         INNER JOIN persona p
         ON pi.persona_id = p.persona_id
+        INNER JOIN tipo_licencia tl
+        ON tl.licencia_id = pi.licencia_id
         WHERE pi.piloto_id = p_piloto_id
         AND pi.mostrar = 1 
         AND p.mostrar = 1;
@@ -151,10 +156,13 @@ CREATE OR REPLACE PACKAGE BODY PILOTO_CRUD AS
                 pi.emision_licencia,
                 pi.vencimiento_licencia,
                 pi.mostrar,
+                tl.licencia,
                 ROW_NUMBER() OVER (ORDER BY p.persona_id) AS rn
             FROM piloto pi 
             INNER JOIN persona p
             ON pi.persona_id = p.persona_id
+            INNER JOIN tipo_licencia tl
+            ON pi.licencia_id = tl.licencia_id
             AND pi.mostrar = 1 
             AND p.mostrar = 1
         )
