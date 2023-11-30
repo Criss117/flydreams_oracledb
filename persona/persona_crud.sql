@@ -27,6 +27,10 @@ CREATE OR REPLACE PACKAGE PERSONA_CRUD AS
     FUNCTION eliminar_persona(
         p_persona_id persona.persona_id%TYPE
     )RETURN BOOLEAN;
+    
+    FUNCTION editar_persona(
+        p_persona_info persona_type
+    ) RETURN BOOLEAN;
 END PERSONA_CRUD;
 /
 CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
@@ -69,6 +73,28 @@ CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
         WHEN OTHERS THEN
         ROLLBACK TO SAVEPOINT v_before_insert_persona;
         RAISE;
+    END;
+    
+    FUNCTION editar_persona(
+        p_persona_info persona_type
+    ) RETURN BOOLEAN
+    IS
+    BEGIN
+        SAVEPOINT v_before_update_persona;
+        UPDATE persona p SET 
+            p.genero_id = p_persona_info.genero_id,
+            p.numero_identificacion = p_persona_info.numero_identificacion,
+            p.nombre = p_persona_info.nombre,
+            p.apellido = p_persona_info.apellido,
+            p.fecha_nac = p_persona_info.fecha_nac,
+            p.pais_nac = p_persona_info.pais_nac,
+            p.ciudad_nac = p_persona_info.ciudad_nac
+        WHERE p.persona_id = p_persona_info.persona_id;
+        RETURN TRUE;
+    EXCEPTION
+        WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT v_before_insert_persona;
+        RAISE;      
     END;
 END PERSONA_CRUD;
 /
