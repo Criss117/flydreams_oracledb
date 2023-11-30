@@ -423,3 +423,34 @@ CREATE OR REPLACE PACKAGE BODY AVION_CRUD AS
           AND rn <= p_pagina * p_tamano_pagina;
     END obtener_aviones_paginados;
 END AVION_CRUD;
+
+
+
+--Trigger:  Al crear o actualizar un pasajero, verificar que el peso del equipaje no supera la capacidad_bodega del avión,  de lo contrario lanzar una excepción con el código -20061 y un mensaje.
+CREATE OR REPLACE TRIGGER TRG_VERIFICAR_DISPONIBILIDAD
+BEFORE INSERT OR UPDATE ON REALIZA
+FOR EACH ROW
+DECLARE
+    v_asientos_disponibles NUMBER;
+    v_costo_pasajero NUMBER;
+BEGIN
+    -- Obtener el costo del pasajero desde la tabla PASAJERO
+    SELECT COSTO
+    INTO v_costo_pasajero
+    FROM PASAJERO
+    WHERE PERSONA_ID = :NEW.PASAJERO_ID;
+
+    -- Obtener la cantidad de asientos disponibles en el vuelo asociado al pasajero
+    SELECT (AV.CAPACIDAD_PASAJEROS - NVL(COUNT(P.PASAJERO_ID), 0))
+    INTO v_asientos_disponibles
+    FROM VUELO V
+    JOIN AVION AV ON V.AVION_ID = AV.AVION_ID
+    LEFT JOIN REALIZA R ON V.VUELO_ID = R.VUELO_ID
+    LEFT JOIN PASAJERO P ON R.PASAJERO_ID = P.PERSONA_ID;
+
+    -- Verificar si hay asientos disponibles
+    IF v_costo_pasajero > 0 AND v_asientos_disponibles <= 0 THEN
+        -- Lanzar una excepción con el código -20062 y un mensaje personalizado
+        RAISE_APPLICATION_ERROR(-20062, 'No hay asientos disponibles en este vuelo.');
+    END IF;
+END;
