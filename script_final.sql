@@ -869,62 +869,6 @@ CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
 END PERSONA_CRUD;
 /
 
---PARA PERSONA:
-DROP SEQUENCE persona_seq;
-CREATE SEQUENCE persona_seq
-    START WITH 15
-    INCREMENT BY 1
-    NOCACHE
-    NOCYCLE;
-/
-CREATE OR REPLACE PACKAGE PERSONA_CRUD AS
-    TYPE persona_type IS RECORD 
-    (
-       persona_id           persona.persona_id%TYPE,
-       genero_id            persona.genero_id%TYPE,
-       numero_identificacion persona.numero_identificacion%TYPE,
-       nombre               persona.nombre%TYPE,
-       apellido             persona.apellido%TYPE,
-       fecha_nac            persona.fecha_nac%TYPE,
-       pais_nac             persona.pais_nac%TYPE,
-       ciudad_nac           persona.ciudad_nac%TYPE,
-       mostrar              persona.mostrar%TYPE
-    );
-
-    FUNCTION crear_persona(
-        p_persona_info persona_type
-    ) RETURN NUMBER;
-END PERSONA_CRUD;
-/
-CREATE OR REPLACE PACKAGE BODY PERSONA_CRUD AS
-    FUNCTION crear_persona(
-        p_persona_info persona_type
-    ) 
-    RETURN NUMBER
-    IS
-        v_persona_id persona.persona_id%TYPE := persona_seq.NEXTVAL;
-    BEGIN
-        SAVEPOINT v_before_insert_persona;
-        INSERT INTO persona (persona_id, genero_id, numero_identificacion, nombre, apellido, fecha_nac, pais_nac, ciudad_nac, mostrar)
-        VALUES (
-            v_persona_id, 
-            p_persona_info.genero_id, 
-            p_persona_info.numero_identificacion, 
-            p_persona_info.nombre,
-            p_persona_info.apellido,
-            p_persona_info.fecha_nac,
-            p_persona_info.pais_nac,
-            p_persona_info.ciudad_nac,
-            1);
-        RETURN v_persona_id;
-    EXCEPTION
-        WHEN OTHERS THEN
-        ROLLBACK TO SAVEPOINT v_before_insert_persona;
-        RAISE;
-    END crear_persona;
-END PERSONA_CRUD;
-/
-
 -----------------------------------------------------------------------------------------
 --PARA AZAFATA
 DROP SEQUENCE azafata_seq;
@@ -1156,6 +1100,7 @@ CREATE OR REPLACE PACKAGE BODY AZAFATA_CRUD AS
         v_persona_id persona.persona_id%TYPE;
         v_before_delete_azafata VARCHAR2(30) := 'BEFORE_DELETE_AZAFATA';
         v_res BOOLEAN := false;
+        delete_error EXCEPTION; 
     BEGIN
         SELECT a.persona_id
         INTO v_persona_id
@@ -1168,8 +1113,8 @@ CREATE OR REPLACE PACKAGE BODY AZAFATA_CRUD AS
         SET a.mostrar = 0
         WHERE a.azafata_id = p_azafata_id;
         
-        res := persona_crud.eliminar_persona(v_persona_id);
-        IF res THEN
+        v_res := persona_crud.eliminar_persona(v_persona_id);
+        IF v_res THEN
             COMMIT;
             RETURN TRUE;
         ELSE
@@ -1226,7 +1171,6 @@ BEGIN
     END IF;
 END;
 /
-
 CREATE OR REPLACE TRIGGER verificar_pasajeros_vuelo
     BEFORE UPDATE OF cantidad_pasajeros ON vuelo
 FOR EACH ROW
@@ -1315,3 +1259,4 @@ BEGIN
         END IF;      
     END LOOP;
 END;
+/
